@@ -1,18 +1,18 @@
 import { Column, Model, Table } from 'sequelize-typescript';
 
-@Table
-export class User extends Model {
-  @Column
+@Table({ tableName: 'users', timestamps: false })
+class User extends Model {
+  @Column({ autoIncrement: true, primaryKey: true })
   id: number;
 
   @Column
   email: string;
 
   @Column
-  first_name: string;
+  firstName: string;
 
   @Column
-  last_name: string;
+  lastName: string;
 
   @Column
   name: string;
@@ -27,20 +27,22 @@ export class User extends Model {
   oldPassword: string;
 
   @Column
-  created_at: Date;
+  createdAt: Date;
 
   @Column
-  deleted_at: Date;
+  deletedAt: Date;
 
   @Column
-  modified_at: Date;
+  modifiedAt: Date;
 
   @Column
-  last_connected_at: number;
+  lastConnectedAt: number;
 
   @Column
-  reset_password_expires: number;
+  resetPasswordExpires: number;
 
   @Column
-  reset_password_token: string;
+  resetPasswordToken: string;
 }
+
+export default User;

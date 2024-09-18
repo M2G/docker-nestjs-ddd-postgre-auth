@@ -1,8 +1,8 @@
 import { Column, Model, Table } from 'sequelize-typescript';
 
-@Table
-export class Token extends Model {
-  @Column
+@Table({ tableName: 'tokens', timestamps: false })
+class Token extends Model {
+  @Column({ autoIncrement: true, primaryKey: true })
   id: number;
 
   @Column
@@ -11,3 +11,5 @@ export class Token extends Model {
   @Column
   expiryDate: string;
 }
+
+export default Token;
