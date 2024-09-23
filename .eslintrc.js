@@ -22,7 +22,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
   ],
   parserOptions: {
-    project: path.resolve(__dirname, './tsconfig.json'),
+    project: [path.resolve(__dirname, './tsconfig.json')],
     tsconfigRootDir: __dirname,
     ecmaVersion: 2020,
     sourceType: 'module',
@@ -71,6 +71,8 @@ module.exports = {
     'no-void': 1,
     'nonblock-statement-body-position': 1,
 
+    '@typescript-eslint/prefer-nullish-coalescing': 1,
+    '@typescript-eslint/no-extraneous-class': 1,
     '@typescript-eslint/prefer-readonly-parameter-types': 1,
     // "@typescript-eslint/prefer-nullish-coalescing": 1,
     '@typescript-eslint/ban-types': 1,
