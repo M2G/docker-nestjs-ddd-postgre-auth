@@ -11,8 +11,9 @@ class UsersService {
     private readonly userModel: typeof User,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {}
-  findAll({
+  // async create(createUserDto: CreateUserDto): Promise<User> {}
+
+  async find({
     filters,
     pageSize,
     page,
@@ -74,15 +75,15 @@ class UsersService {
         };
       }
 
-      const currPage = +page || 1;
+      const currPage = Number(page) || 1;
 
       const data = await this.userModel.findAll({
         ...query,
         attributes,
-        raw: true,
-        nest: true,
         limit: pageSize,
+        nest: true,
         offset: pageSize * (currPage - 1),
+        raw: true,
       });
 
       const pages = Math.ceil(data.length / pageSize);
@@ -97,11 +98,13 @@ class UsersService {
           prev,
         },
         results: data?.length ? data.map((d) => ({ ...d })) : [],
-      };
+      } as any;
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
+
+  /*
   findOne(id: number): Promise<User> {}
   changePassword(): Promise<User[]> {}
   forgotPassword(): Promise<User[]> {}
@@ -109,6 +112,8 @@ class UsersService {
   register(): Promise<User[]> {}
   authenticate(): Promise<User[]> {}
   async update(id: number, updateUserDto: any): Promise<User[]> {}
+
+   */
 }
 
 export default UsersService;

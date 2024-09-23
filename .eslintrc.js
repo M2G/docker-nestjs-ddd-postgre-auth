@@ -71,6 +71,9 @@ module.exports = {
     'no-void': 1,
     'nonblock-statement-body-position': 1,
 
+    '@typescript-eslint/parameter-properties': 1,
+    '@typescript-eslint/explicit-member-accessibility': 1,
+    '@typescript-eslint/no-unsafe-argument': 1,
     '@typescript-eslint/prefer-nullish-coalescing': 1,
     '@typescript-eslint/no-extraneous-class': 1,
     '@typescript-eslint/prefer-readonly-parameter-types': 1,
