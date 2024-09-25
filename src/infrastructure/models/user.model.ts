@@ -9,7 +9,7 @@ class User extends Model {
   email: string;
 
   @Column
-  firstName: string;
+  firstname: string;
 
   @Column
   lastName: string;

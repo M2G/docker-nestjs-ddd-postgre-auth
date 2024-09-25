@@ -6,7 +6,7 @@ import User from '@infrastructure/repository/user';
 
 // Se inyecta el repo en el servicio
 @Injectable()
-export class UserService {
+class UserService {
   constructor(private readonly repository: UserRepository) {}
 
   /*
@@ -22,3 +22,5 @@ export class UserService {
     return this.repository.find({ ...args } as any);
   }
 }
+
+export default UserService;

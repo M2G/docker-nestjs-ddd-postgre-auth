@@ -1,7 +1,9 @@
 -- Set params
 
 -- load the pgcrypto extension to gen_random_uuid ()
-CREATE EXTENSION pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+DROP FUNCTION IF EXISTS random_text;
 
 CREATE FUNCTION random_text(INTEGER)
 RETURNS TEXT

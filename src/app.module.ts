@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from '@infrastructure/database/database.module';
+// import { DatabaseModule } from '@infrastructure/database/database.module';
+import { SequelizeModule } from '@nestjs/sequelize';
 import AppController from './app.controller';
 import AppService from './app.service';
-import { UsersController } from '@application/controllers/users/users.controllers';
-import { UserService } from '@domain/services/users/user.service';
+// import { UsersController } from '@application/controllers/users/users.controllers';
+// import { UserService } from '@domain/services/users/user.service';
 import UserModule from './user.module';
-import { SequelizeModule } from '@nestjs/sequelize';
 
 @Module({
   controllers: [AppController],

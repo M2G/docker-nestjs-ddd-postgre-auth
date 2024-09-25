@@ -17,7 +17,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { UserService } from '@domain/services/users/user.service';
+import UserService from '@domain/services/users/user.service';
 // import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('users')
@@ -27,8 +27,10 @@ export class UsersController {
 
   @Get()
   findAll(@Request() req): Promise<any[]> {
-    // return this.usersService.findAll();
-    //@ts-ignore
-    return { message: 'Hello World!' };
+    return this.usersService.find({
+      //@ts-ignore
+      page: 1,
+      pageSize: 5,
+    });
   }
 }
