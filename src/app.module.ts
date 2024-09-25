@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 // import { DatabaseModule } from '@infrastructure/database/database.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import AppController from './app.controller';
@@ -6,6 +6,7 @@ import AppService from './app.service';
 // import { UsersController } from '@application/controllers/users/users.controllers';
 // import { UserService } from '@domain/services/users/user.service';
 import UserModule from './user.module';
+import LoggerMiddleware from '@application/middleware';
 
 @Module({
   controllers: [AppController],
@@ -24,4 +25,8 @@ import UserModule from './user.module';
   ],
   providers: [AppService],
 })
-export default class AppModule {}
+export default class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('cats');
+  }
+}

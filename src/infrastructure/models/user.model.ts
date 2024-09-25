@@ -9,13 +9,10 @@ class User extends Model {
   email: string;
 
   @Column
-  firstname: string;
+  first_name: string;
 
   @Column
-  lastName: string;
-
-  @Column
-  name: string;
+  last_name: string;
 
   @Column
   username: string;
@@ -24,25 +21,25 @@ class User extends Model {
   password: string;
 
   @Column
-  oldPassword: string;
+  old_password: string;
 
   @Column
-  createdAt: Date;
+  created_at: Date;
 
   @Column
-  deletedAt: Date;
+  deleted_at: number;
 
   @Column
-  modifiedAt: Date;
+  modified_at: Date;
 
   @Column
-  lastConnectedAt: number;
+  last_connected_at: number;
 
   @Column
-  resetPasswordExpires: number;
+  reset_password_expires: number;
 
   @Column
-  resetPasswordToken: string;
+  reset_password_token: string;
 }
 
 export default User;
