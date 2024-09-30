@@ -21,6 +21,18 @@ class UserService {
   find({ ...args }: { args: any }): Promise<any[]> {
     return this.repository.find({ ...args } as any);
   }
+
+  /*
+   authenticate,
+    changePassword,
+    findOne,
+    forgotPassword,
+    getAll,
+    register,
+    remove,
+    resetPassword,
+    update,
+   */
 }
 
 export default UserService;

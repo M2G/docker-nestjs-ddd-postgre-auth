@@ -27,10 +27,13 @@ export class UsersController {
 
   @Get()
   findAll(@Request() req): Promise<any[]> {
+    console.log('req', req);
+    const { filters, pageSize, page, attributes } = req.query;
     return this.usersService.find({
-      //@ts-ignore
-      page: 1,
-      pageSize: 5,
+      attributes,
+      filters,
+      page,
+      pageSize,
     });
   }
 }
