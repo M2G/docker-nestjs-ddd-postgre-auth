@@ -18,8 +18,40 @@ class UserService {
     return await this.repository.create(createUserDto);
   }
 */
-  find({ ...args }: { args: any }): Promise<any[]> {
+  find({ ...args }: { args: any }): any {
     return this.repository.find({ ...args } as any);
+  }
+
+  authenticate({ ...args }: { args: any }): any {
+    return this.repository.authenticate({ ...args } as any);
+  }
+
+  changePassword({ ...args }: { args: any }): any {
+    return this.repository.changePassword({ ...args } as any);
+  }
+
+  findOne({ ...args }: { args: any }): any {
+    return this.repository.findOne({ ...args } as any);
+  }
+
+  forgotPassword({ ...args }: { args: any }): any {
+    return this.repository.forgotPassword({ ...args } as any);
+  }
+
+  register({ ...args }: { args: any }): any {
+    return this.repository.register({ ...args } as any);
+  }
+
+  remove({ ...args }: { args: any }): any {
+    return this.repository.remove({ ...args } as any);
+  }
+
+  resetPassword({ ...args }: { args: any }): any {
+    return this.repository.resetPassword({ ...args } as any);
+  }
+
+  update({ ...args }: { args: any }): any {
+    return this.repository.update({ ...args } as any);
   }
 
   /*

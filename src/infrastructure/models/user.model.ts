@@ -39,7 +39,7 @@ class User extends Model {
   reset_password_expires: number;
 
   @Column
-  reset_password_token: string;
+  reset_password_token: string | null;
 }
 
 export default User;

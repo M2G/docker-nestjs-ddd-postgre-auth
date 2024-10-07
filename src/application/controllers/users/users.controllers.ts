@@ -26,14 +26,9 @@ export class UsersController {
   constructor(private readonly usersService: UserService) {}
 
   @Get()
-  findAll(@Request() req): Promise<any[]> {
+  findAll(@Request() req): any {
     console.log('req', req);
-    const { filters, pageSize, page, attributes } = req.query;
-    return this.usersService.find({
-      attributes,
-      filters,
-      page,
-      pageSize,
-    });
+    const { ...args } = req.query;
+    return this.usersService.find(args);
   }
 }

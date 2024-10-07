@@ -1,14 +1,17 @@
 import { InjectModel } from '@nestjs/sequelize';
+import { JwtService } from '@nestjs/jwt';
 import { UniqueConstraintError, Op } from 'sequelize';
 import { Injectable } from '@nestjs/common';
 import CreateUserDto from '@application/dto/users';
 import User from '@infrastructure/models/user.model';
+import { encryptPassword, validatePassword } from '@encryption';
 
 @Injectable()
 class UsersService {
   constructor(
     @InjectModel(User)
     private readonly userModel: typeof User,
+    private readonly jwtService: JwtService,
   ) {}
 
   // async create(createUserDto: CreateUserDto): Promise<User> {}
@@ -105,25 +108,25 @@ class UsersService {
   }
 
   async register({
-                            created_at,
-                            email,
-                            password,
-                            deleted_at,
-                          }: {
+    created_at,
+    email,
+    password,
+    deleted_at,
+  }: {
     created_at: number;
     deleted_at: number;
     email: string;
     password: string;
-  }): Promise<IUser> {
+  }): Promise<User> {
     try {
-      const { dataValues } = await model.create({
+      const { dataValues } = await this.userModel.create({
         created_at,
         deleted_at,
         email,
         password,
       });
 
-      return ({ ...dataValues });
+      return { ...dataValues };
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         throw new Error('Duplicate error');
@@ -134,20 +137,23 @@ class UsersService {
   }
 
   async changePassword({
-                                  id,
-                                  password,
-                                  oldPassword,
-                                }: {
-    id: string;
+    id,
+    password,
+    oldPassword,
+  }: {
+    id: number;
     password: string;
     oldPassword: string;
   }): Promise<unknown> {
     try {
-      const dataValues = await this.userModel.findOne({ where: { id } }, { raw: true });
+      const dataValues = await this.userModel.findOne(
+        { where: { id } },
+        //  , { raw: true }
+      );
 
       if (
-          dataValues?.dataValues?.password &&
-          validatePassword(dataValues.dataValues.password)(oldPassword)
+        dataValues?.dataValues?.password &&
+        validatePassword(dataValues.dataValues.password)(oldPassword)
       ) {
         const hashPassword = encryptPassword(password);
         return this.update({ id, password: hashPassword });
@@ -161,7 +167,10 @@ class UsersService {
 
   async forgotPassword({ email }: { email: string }): Promise<unknown> {
     try {
-      const data = await this.userModel.findOne({ where: { email } }, { raw: true });
+      const data = await this.userModel.findOne(
+        { where: { email } },
+        //  , { raw: true }
+      );
 
       if (!data?.dataValues) return null;
 
@@ -175,7 +184,7 @@ class UsersService {
         expiresIn: process.env.JWT_TOKEN_EXPIRE_TIME,
         subject: data?.dataValues.email,
       };
-      const token: string = jwt.signin(options)(payload);
+      const token: string = this.jwtService.sign(payload, options);
 
       return this.update({
         id: data?.dataValues.id,
@@ -188,23 +197,23 @@ class UsersService {
   }
 
   async resetPassword({
-                                 password,
-                                 reset_password_token,
-                               }: {
+    password,
+    reset_password_token,
+  }: {
     password: string;
     reset_password_token: string;
   }): Promise<unknown | null> {
     try {
       const dataValues = await this.userModel.findOne(
-          {
-            where: {
-              reset_password_expires: {
-                [Op.gt]: Date.now(),
-              },
-              reset_password_token,
+        {
+          where: {
+            reset_password_expires: {
+              [Op.gt]: Date.now(),
             },
+            reset_password_token,
           },
-          { raw: true },
+        },
+        // { raw: true },
       );
 
       if (!dataValues) return null;
@@ -213,7 +222,7 @@ class UsersService {
       dataValues.reset_password_token = null;
       dataValues.reset_password_expires = Date.now();
 
-      return this.update({ ...dataValues });
+      return this.update({ ...dataValues } as any);
     } catch (error) {
       throw new Error(error as string | undefined);
     }
@@ -223,13 +232,13 @@ class UsersService {
     try {
       const data = await this.userModel.findByPk(id, { raw: true });
       if (!data) return null;
-      return ({ ...data });
+      return { ...data };
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
 
-  remove({ id }: { id: number }): number {
+  remove({ id }: { id: number }): any {
     try {
       return this.userModel.destroy({ where: { id } });
     } catch (error) {
@@ -237,23 +246,28 @@ class UsersService {
     }
   }
 
-  update({ id, ...params }: { id: number; params: IUser }): unknown | null {
+  update({ id, ...params }: { id: number; params: User }): unknown | null {
     try {
-      return this.userModel.update({ ...params }, { where: { id } }, { raw: true });
+      return this.userModel.update(
+        { ...params },
+        { where: { id } },
+        // , { raw: true }
+      );
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
 
-  async function authenticate({ email }: { email: string }): Promise<unknown | null> {
-    console.log('authenticate authenticate authenticate', model);
-
+  async authenticate({ email }: { email: string }): Promise<unknown | null> {
     try {
-      const user = await this.userModel.findOne({ where: { email } }, { raw: true });
+      const user = await this.userModel.findOne(
+        { where: { email } },
+        //  , { raw: true }
+      );
 
       console.log('authenticate', user);
       if (!user) return null;
-      return (user);
+      return user;
     } catch (error) {
       throw new Error(error as string | undefined);
     }
