@@ -8,10 +8,10 @@ class UserEntity {
   email: string;
 
   @IsString()
-  firstName: string;
+  first_name: string;
 
   @IsString()
-  lastName: string;
+  last_name: string;
 
   @IsString()
   name: string;
@@ -23,25 +23,25 @@ class UserEntity {
   password: string;
 
   @IsString()
-  oldPassword: string;
+  old_password: string;
 
   @IsDate()
-  createdAt: Date;
+  created_at: Date;
 
   @IsDate()
-  deletedAt: Date;
+  deleted_at: Date;
 
   @IsDate()
-  modifiedAt: Date;
+  modified_at: Date;
 
   @IsNumber()
-  lastConnectedAt: number;
+  last_connected_at: number;
 
   @IsNumber()
-  resetPasswordExpires: number;
+  reset_password_expires: number;
 
   @IsString()
-  resetPasswordToken: string;
+  reset_password_token: string;
 }
 
 export default UserEntity;

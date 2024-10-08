@@ -1,10 +1,11 @@
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { JwtService } from '@nestjs/jwt';
 import { UniqueConstraintError, Op } from 'sequelize';
-import { Injectable } from '@nestjs/common';
-import CreateUserDto from '@application/dto/users';
 import User from '@infrastructure/models/user.model';
 import { encryptPassword, validatePassword } from '@encryption';
+import UserEntity from '@application/dto/users';
 
 @Injectable()
 class UsersService {
@@ -26,7 +27,7 @@ class UsersService {
     pageSize: number;
     page: number;
     attributes: string[] | undefined;
-  }): Promise<User[]> {
+  }): Promise<UserEntity[]> {
     try {
       const query: {
         where: {
@@ -107,17 +108,7 @@ class UsersService {
     }
   }
 
-  async register({
-    created_at,
-    email,
-    password,
-    deleted_at,
-  }: {
-    created_at: number;
-    deleted_at: number;
-    email: string;
-    password: string;
-  }): Promise<User> {
+  async register({ created_at, email, password, deleted_at }: UserEntity): Promise<User> {
     try {
       const { dataValues } = await this.userModel.create({
         created_at,
@@ -136,15 +127,7 @@ class UsersService {
     }
   }
 
-  async changePassword({
-    id,
-    password,
-    oldPassword,
-  }: {
-    id: number;
-    password: string;
-    oldPassword: string;
-  }): Promise<unknown> {
+  async changePassword({ id, password, old_password }: UserEntity): Promise<unknown> {
     try {
       const dataValues = await this.userModel.findOne(
         { where: { id } },
@@ -153,10 +136,10 @@ class UsersService {
 
       if (
         dataValues?.dataValues?.password &&
-        validatePassword(dataValues.dataValues.password)(oldPassword)
+        validatePassword(dataValues.dataValues.password)(old_password)
       ) {
         const hashPassword = encryptPassword(password);
-        return this.update({ id, password: hashPassword });
+        return this.update({ id, password: hashPassword } as any);
       }
 
       return null;
@@ -165,7 +148,7 @@ class UsersService {
     }
   }
 
-  async forgotPassword({ email }: { email: string }): Promise<unknown> {
+  async forgotPassword({ email }: UserEntity): Promise<unknown> {
     try {
       const data = await this.userModel.findOne(
         { where: { email } },
@@ -190,19 +173,13 @@ class UsersService {
         id: data?.dataValues.id,
         reset_password_expires: Date.now() + 86400000,
         reset_password_token: token,
-      });
+      } as any);
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
 
-  async resetPassword({
-    password,
-    reset_password_token,
-  }: {
-    password: string;
-    reset_password_token: string;
-  }): Promise<unknown | null> {
+  async resetPassword({ password, reset_password_token }: UserEntity): Promise<unknown | null> {
     try {
       const dataValues = await this.userModel.findOne(
         {
@@ -246,7 +223,7 @@ class UsersService {
     }
   }
 
-  update({ id, ...params }: { id: number; params: User }): unknown | null {
+  update({ id, ...params }: UserEntity): unknown | null {
     try {
       return this.userModel.update(
         { ...params },

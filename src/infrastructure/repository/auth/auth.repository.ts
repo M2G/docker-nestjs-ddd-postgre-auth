@@ -13,7 +13,10 @@ class UsersService {
 
   async authenticate({ email }: { email: string }): Promise<unknown | null> {
     try {
-      const user = await this.userModel.findOne({ where: { email } }, { raw: true });
+      const user = await this.userModel.findOne(
+        { where: { email } },
+        // , { raw: true }
+      );
 
       console.log('authenticate', user);
       if (!user) return null;
