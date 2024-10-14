@@ -9,3 +9,4 @@
 **/.editorconfig
 **/.aws
 **/dist
+**/package-lock.json

@@ -5,11 +5,10 @@
 FROM node:20.6.0-alpine3.17 AS build
 
 ## Install build toolchain, install node deps and compile native add-ons
-RUN apk add --no-cache \
-  build-base \
-  gcc \
-  g++ \
-  make
+## https://stackoverflow.com/questions/70852805/bcrypt-error-in-docker-container-error-path-to-local-module-node-modules-bcry
+RUN apk add --no-cache make gcc g++ && \
+    npm rebuild bcrypt --build-from-source && \
+    apk del make gcc g++
 
 # Create App dir
 RUN mkdir -p /app
