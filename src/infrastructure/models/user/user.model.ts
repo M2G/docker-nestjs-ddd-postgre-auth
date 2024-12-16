@@ -1,4 +1,4 @@
-import { Column, Model, Table } from 'sequelize-typescript';
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
 @Table({ tableName: 'users', timestamps: false })
 class User extends Model {
@@ -13,9 +13,6 @@ class User extends Model {
 
   @Column
   last_name: string;
-
-  @Column
-  username: string;
 
   @Column
   password: string;
@@ -38,8 +35,8 @@ class User extends Model {
   @Column
   reset_password_expires: number;
 
-  @Column
-  reset_password_token: string | null;
+  @Column({ type: DataType.STRING })
+  reset_password_token?: string | null;
 }
 
 export default User;
