@@ -71,6 +71,10 @@ module.exports = {
     'no-void': 1,
     'nonblock-statement-body-position': 1,
 
+    '@typescript-eslint/class-methods-use-this': 1,
+    '@typescript-eslint/max-params': 1,
+    '@typescript-eslint/return-await': 1,
+    '@typescript-eslint/promise-function-async': 1,
     '@typescript-eslint/no-redundant-type-constituents': 1,
     '@typescript-eslint/parameter-properties': 1,
     '@typescript-eslint/explicit-member-accessibility': 1,
