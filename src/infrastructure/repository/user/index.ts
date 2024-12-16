@@ -1,3 +1,3 @@
-import UsersService from './user.repository';
+import UsersRepository from './user.repository';
 
-export default UsersService;
+export default UsersRepository;

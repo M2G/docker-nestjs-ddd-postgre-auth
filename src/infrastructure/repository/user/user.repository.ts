@@ -1,21 +1,60 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { JwtService } from '@nestjs/jwt';
 import { UniqueConstraintError, Op } from 'sequelize';
-import User from '@infrastructure/models/user.model';
+import bcrypt from 'bcrypt';
+import { User } from '@infrastructure/models';
 import { encryptPassword, validatePassword } from '@encryption';
-import UserEntity from '@application/dto/users';
+import { CreateUserDto, UpdateUserDto } from '@application/dto/users';
+import updateUserDto from '@application/dto/users/update-user.dto';
+import { RedisService } from '@domain/services';
+
+export interface IUserRepository {
+  authenticate: ({ email }: User) => Promise<User | null>;
+  find: ({
+    filters,
+    pageSize,
+    page,
+    attributes,
+  }: {
+    filters: string;
+    pageSize: number;
+    page: number;
+    attributes: string[] | undefined;
+  }) => Promise<User[]>;
+  findOne: ({ id }: { id: number }) => Promise<User | null>;
+  forgotPassword: ({ email }: { email: string }) => Promise<User | null>;
+  register: (createUserDto: CreateUserDto) => User;
+  resetPassword: ({
+    password,
+    reset_password_token,
+  }: {
+    password: string;
+    reset_password_token: string;
+  }) => Promise<User | null>;
+  changePassword: ({
+    id,
+    password,
+    old_password,
+  }: {
+    id: number;
+    password: string;
+    old_password: string;
+  }) => Promise<User | null>;
+  update: (updateUserDto: UpdateUserDto) => Promise<User | null>;
+  remove: ({ id }: { id: number }) => Promise<boolean>;
+}
 
 @Injectable()
-class UsersService {
+class UsersRepository implements IUserRepository {
   constructor(
     @InjectModel(User)
     private readonly userModel: typeof User,
     private readonly jwtService: JwtService,
-  ) {}
 
-  // async create(createUserDto: CreateUserDto): Promise<User> {}
+    @Inject(forwardRef(() => RedisService))
+    private readonly redisService: RedisService,
+  ) {}
 
   async find({
     filters,
@@ -27,7 +66,7 @@ class UsersService {
     pageSize: number;
     page: number;
     attributes: string[] | undefined;
-  }): Promise<UserEntity[]> {
+  }): Promise<User[]> {
     try {
       const query: {
         where: {
@@ -79,6 +118,15 @@ class UsersService {
         };
       }
 
+      console.log('query query query', query);
+      console.log('attributes attributes attributes', attributes);
+
+      if (!filters) {
+        const cachingUserList = await this.redisService.findUsers();
+        console.log('cachingUserList cachingUserList cachingUserList', cachingUserList);
+        if (cachingUserList) return cachingUserList as unknown as User[];
+      }
+
       const currPage = Number(page) || 1;
 
       const data = await this.userModel.findAll({
@@ -89,6 +137,10 @@ class UsersService {
         offset: pageSize * (currPage - 1),
         raw: true,
       });
+
+      console.log('DATA', data);
+
+      void this.redisService.saveUsers(data as any);
 
       const pages = Math.ceil(data.length / pageSize);
       const prev = currPage > 1 ? currPage - 1 : null;
@@ -108,16 +160,31 @@ class UsersService {
     }
   }
 
-  async register({ created_at, email, password, deleted_at }: UserEntity): Promise<User> {
+  async findOne({ id }: { id: number }): Promise<User | null> {
     try {
-      const { dataValues } = await this.userModel.create({
-        created_at,
-        deleted_at,
-        email,
-        password,
-      });
+      const cachingUser = await this.redisService.findUser(id as any);
+      if (cachingUser) return cachingUser as unknown as User;
 
-      return { ...dataValues };
+      const data = await this.userModel.findByPk(id, { raw: true });
+      void this.redisService.saveUser(data as any);
+      return data;
+    } catch (error) {
+      throw new Error(error as string | undefined);
+    }
+  }
+
+  register({ created_at, deleted_at, email, password }: CreateUserDto): User {
+    try {
+      const hashPassword = encryptPassword(password);
+      return this.userModel.create(
+        {
+          created_at,
+          deleted_at,
+          email,
+          password: hashPassword,
+        },
+        { raw: true },
+      ) as any;
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         throw new Error('Duplicate error');
@@ -127,10 +194,37 @@ class UsersService {
     }
   }
 
-  async changePassword({ id, password, old_password }: UserEntity): Promise<unknown> {
+  async remove({ id }: { id: number }): Promise<boolean> {
+    console.log('id', id);
+    try {
+      const ok = await this.userModel.destroy({ where: { id } });
+      void this.redisService.removeUser(id);
+      return !!ok;
+    } catch (error) {
+      throw new Error(error as string | undefined);
+    }
+  }
+
+  async authenticate({ email }: { email: string }): Promise<any | null> {
+    try {
+      return this.userModel.findOne({ raw: true, where: { email } });
+    } catch (error) {
+      throw new Error(error as string | undefined);
+    }
+  }
+
+  async changePassword({
+    id,
+    password,
+    old_password,
+  }: {
+    id: number;
+    password: string;
+    old_password: string;
+  }): Promise<User | null> {
     try {
       const dataValues = await this.userModel.findOne(
-        { where: { id } },
+        { raw: true, where: { id } },
         //  , { raw: true }
       );
 
@@ -139,7 +233,7 @@ class UsersService {
         validatePassword(dataValues.dataValues.password)(old_password)
       ) {
         const hashPassword = encryptPassword(password);
-        return this.update({ id, password: hashPassword } as any);
+        return this.update({ id, password: hashPassword } as UpdateUserDto);
       }
 
       return null;
@@ -148,10 +242,10 @@ class UsersService {
     }
   }
 
-  async forgotPassword({ email }: UserEntity): Promise<unknown> {
+  async forgotPassword({ email }: { email: string }): Promise<User | null> {
     try {
       const data = await this.userModel.findOne(
-        { where: { email } },
+        { raw: true, where: { email } },
         //  , { raw: true }
       );
 
@@ -167,22 +261,30 @@ class UsersService {
         expiresIn: process.env.JWT_TOKEN_EXPIRE_TIME,
         subject: data?.dataValues.email,
       };
+
       const token: string = this.jwtService.sign(payload, options);
 
       return this.update({
         id: data?.dataValues.id,
         reset_password_expires: Date.now() + 86400000,
         reset_password_token: token,
-      } as any);
+      } as updateUserDto);
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
 
-  async resetPassword({ password, reset_password_token }: UserEntity): Promise<unknown | null> {
+  async resetPassword({
+    password,
+    reset_password_token,
+  }: {
+    password: string;
+    reset_password_token: string;
+  }): Promise<User | null> {
     try {
-      const dataValues = await this.userModel.findOne(
+      const dataValues: User | null = await this.userModel.findOne(
         {
+          raw: true,
           where: {
             reset_password_expires: {
               [Op.gt]: Date.now(),
@@ -205,61 +307,19 @@ class UsersService {
     }
   }
 
-  async findOne({ id }: { id: number }): Promise<unknown | null> {
-    try {
-      const data = await this.userModel.findByPk(id, { raw: true });
-      if (!data) return null;
-      return { ...data };
-    } catch (error) {
-      throw new Error(error as string | undefined);
-    }
-  }
-
-  remove({ id }: { id: number }): any {
-    try {
-      return this.userModel.destroy({ where: { id } });
-    } catch (error) {
-      throw new Error(error as string | undefined);
-    }
-  }
-
-  update({ id, ...params }: UserEntity): unknown | null {
+  update({ id, ...params }: UpdateUserDto): Promise<User | null> {
     try {
       return this.userModel.update(
         { ...params },
-        { where: { id } },
-        // , { raw: true }
-      );
+        {
+          // raw: true,
+          where: { id },
+        },
+      ) as any;
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
-
-  async authenticate({ email }: { email: string }): Promise<unknown | null> {
-    try {
-      const user = await this.userModel.findOne(
-        { where: { email } },
-        //  , { raw: true }
-      );
-
-      console.log('authenticate', user);
-      if (!user) return null;
-      return user;
-    } catch (error) {
-      throw new Error(error as string | undefined);
-    }
-  }
-
-  /*
-  findOne(id: number): Promise<User> {}
-  changePassword(): Promise<User[]> {}
-  forgotPassword(): Promise<User[]> {}
-  resetPassword(): Promise<User[]> {}
-  register(): Promise<User[]> {}
-  authenticate(): Promise<User[]> {}
-  async update(id: number, updateUserDto: any): Promise<User[]> {}
-
-   */
 }
 
-export default UsersService;
+export default UsersRepository;
