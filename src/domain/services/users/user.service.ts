@@ -1,70 +1,78 @@
-import { Injectable, Inject } from '@nestjs/common';
-import CreateUserDto from '@application/dto/users/user.dto';
-import UserRepository from '@infrastructure/repository/user/user.repository';
-import { InjectModel } from '@nestjs/sequelize';
-import User from '@infrastructure/repository/user';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { CreateUserDto, UpdateUserDto } from '@application/dto/users';
+import { UsersRepository } from '@infrastructure/repository';
+import { User } from '@infrastructure/models';
 
-// Se inyecta el repo en el servicio
 @Injectable()
 class UserService {
-  constructor(private readonly repository: UserRepository) {}
+  constructor(
+    @Inject(forwardRef(() => UsersRepository)) private readonly userRepository: UsersRepository,
+  ) {}
 
-  /*
-  getHello(): string {
-    return 'Hello World!';
+  find({
+    attributes,
+    filters,
+    page,
+    pageSize,
+  }: {
+    attributes: string[] | undefined;
+    filters: string;
+    page: number;
+    pageSize: number;
+  }): User[] {
+    return this.userRepository.find({
+      attributes,
+      filters,
+      page,
+      pageSize,
+    }) as any;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    return await this.repository.create(createUserDto);
-  }
-*/
-  find({ ...args }: { args: any }): any {
-    return this.repository.find({ ...args } as any);
+  findOne({ id }: { id: number }): Promise<User | null> {
+    return this.userRepository.findOne({ id });
   }
 
-  authenticate({ ...args }: { args: any }): any {
-    return this.repository.authenticate({ ...args } as any);
+  register(createUserDto: CreateUserDto): User {
+    return this.userRepository.register(createUserDto);
   }
 
-  changePassword({ ...args }: { args: any }): any {
-    return this.repository.changePassword({ ...args } as any);
+  remove({ id }: { id: number }): Promise<boolean> {
+    return this.userRepository.remove({ id });
   }
 
-  findOne({ ...args }: { args: any }): any {
-    return this.repository.findOne({ ...args } as any);
+  update(updateUserDto: UpdateUserDto): User | null {
+    return this.userRepository.update(updateUserDto) as any;
   }
 
-  forgotPassword({ ...args }: { args: any }): any {
-    return this.repository.forgotPassword({ ...args } as any);
+  authenticate({ email }: { email: string }): Promise<User | null> {
+    return this.userRepository.authenticate({ email });
   }
 
-  register({ ...args }: { args: any }): any {
-    return this.repository.register({ ...args } as any);
+  changePassword({
+    id,
+    password,
+    old_password,
+  }: {
+    id: number;
+    password: string;
+    old_password: string;
+  }): Promise<User | null> {
+    return this.userRepository.changePassword({ id, old_password, password } as User);
   }
 
-  remove({ ...args }: { args: any }): any {
-    return this.repository.remove({ ...args } as any);
+  forgotPassword({ email }: { email: string }): Promise<User | null> {
+    return this.userRepository.forgotPassword({ email });
   }
 
-  resetPassword({ ...args }: { args: any }): any {
-    return this.repository.resetPassword({ ...args } as any);
+  resetPassword({
+    password,
+    reset_password_token,
+  }: {
+    password: string;
+    reset_password_token: string;
+  }): Promise<User | null> {
+    return this.userRepository.resetPassword({ password, reset_password_token } as any);
   }
-
-  update({ ...args }: { args: any }): any {
-    return this.repository.update({ ...args } as any);
-  }
-
-  /*
-   authenticate,
-    changePassword,
-    findOne,
-    forgotPassword,
-    getAll,
-    register,
-    remove,
-    resetPassword,
-    update,
-   */
 }
 
 export default UserService;
