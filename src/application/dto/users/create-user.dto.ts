@@ -1,6 +1,6 @@
 import { IsString, IsDate, IsNumber, IsEmpty } from 'class-validator';
 
-class UserEntity {
+class CreateUserEntity {
   @IsNumber()
   id: number;
 
@@ -12,9 +12,6 @@ class UserEntity {
 
   @IsString()
   last_name: string;
-
-  @IsString()
-  name: string;
 
   @IsString()
   username: string;
@@ -29,7 +26,7 @@ class UserEntity {
   created_at: Date;
 
   @IsDate()
-  deleted_at: Date;
+  deleted_at: number;
 
   @IsDate()
   modified_at: Date;
@@ -44,4 +41,4 @@ class UserEntity {
   reset_password_token: string;
 }
 
-export default UserEntity;
+export default CreateUserEntity;

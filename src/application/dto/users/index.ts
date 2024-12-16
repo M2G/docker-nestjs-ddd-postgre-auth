@@ -1,3 +1,4 @@
-import UserDto from './user.dto';
+import CreateUserDto from './create-user.dto';
+import UpdateUserDto from './update-user.dto';
 
-export default UserDto;
+export { CreateUserDto, UpdateUserDto };
