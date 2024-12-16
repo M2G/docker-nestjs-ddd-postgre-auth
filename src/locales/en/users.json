@@ -1,0 +1,4 @@
+{
+  "deleteSuccess": "Post with ID {id} deleted successfully",
+  "notFound": "User with ID {id} not found"
+}
