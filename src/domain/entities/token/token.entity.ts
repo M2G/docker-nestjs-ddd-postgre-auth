@@ -8,7 +8,7 @@ class TokenEntity {
   token: string;
 
   @IsNumber()
-  expiryDate: string;
+  expiryDate: number;
 }
 
 export default TokenEntity;

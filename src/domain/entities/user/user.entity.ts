@@ -1,21 +1,5 @@
 import { IsString, IsDate, IsNumber } from 'class-validator';
 
-/*
-created_at
-deleted_at
-email
-first_name
-id
-last_connected_at
-last_name
-modified_at
-password
-oldPassword
-reset_password_expires
-reset_password_token
-username
- */
-
 class UserEntity {
   @IsNumber()
   id: number;
@@ -24,13 +8,10 @@ class UserEntity {
   email: string;
 
   @IsString()
-  firstName: string;
+  first_name: string;
 
   @IsString()
-  lastName: string;
-
-  @IsString()
-  name: string;
+  last_name: string;
 
   @IsString()
   username: string;
@@ -39,25 +20,25 @@ class UserEntity {
   password: string;
 
   @IsString()
-  oldPassword: string;
+  old_password: string;
 
   @IsDate()
-  createdAt: Date;
+  created_at: Date;
 
   @IsDate()
-  deletedAt: Date;
+  deleted_at: Date;
 
   @IsDate()
-  modifiedAt: Date;
+  modified_at: Date;
 
   @IsNumber()
-  lastConnectedAt: number;
+  last_connected_at: number;
 
   @IsNumber()
-  resetPasswordExpires: number;
+  reset_password_expires: number;
 
   @IsString()
-  resetPasswordToken: string;
+  reset_password_token: string | null;
 }
 
 export default UserEntity;
