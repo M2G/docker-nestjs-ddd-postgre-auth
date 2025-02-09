@@ -1,31 +1,30 @@
 import { Module, NestModule, MiddlewareConsumer, forwardRef } from '@nestjs/common';
-// import { DatabaseModule } from '@infrastructure/database/database.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import * as path from 'path';
+import { JwtModule } from '@nestjs/jwt';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ConfigModule } from '@nestjs/config';
 import LoggerMiddleware from '@application/middleware';
 import { YcI18nModule } from './yc-i18n/yc-i18n.module';
 import AppController from './app.controller';
 import AppService from './app.service';
-// import { UsersController } from '@application/controllers/users/users.controllers';
-// import { UserService } from '@domain/services/users/user.service';
 import UsersModule from './user.module';
 import RedisModule from './redis.module';
-import { OrdersModule } from './test/order.module';
-import { PaymentModule } from './test/payment.module';
-import { UserService } from '@domain/services';
-import UserRepository from '@infrastructure/repository/user/user.repository';
-import User from '@infrastructure/models/user';
-import { LocalStrategy } from '@application/auth/strategies/local.strategy';
-import { JwtModule } from '@nestjs/jwt';
 import AuthModule from './auth.module';
-//import { RedisService } from './config/redis';
+import MailModule from './mail.module';
+import TaskModule from './task.module';
 
 @Module({
   controllers: [AppController],
   imports: [
-    RedisModule,
+    ScheduleModule.forRoot(),
+    ConfigModule.forRoot({
+      envFilePath: ['.env', '.env.example'],
+      isGlobal: true,
+    }),
     JwtModule.register({
+      global: true,
       secret: 'secret',
       signOptions: { expiresIn: '60s' },
     }),
@@ -42,7 +41,8 @@ import AuthModule from './auth.module';
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
-        path: path.resolve(__dirname, '../../src/locales/'),
+        // path: path.resolve(__dirname, '../../src/locales/'),
+        path: path.join(__dirname, '../../src/locales/'),
         watch: true,
       },
       resolvers: [
@@ -52,24 +52,21 @@ import AuthModule from './auth.module';
       ],
       // typesOutputPath: path.join(__dirname, '../src/generated/i18n.generated.ts'),
     }),
+
+    MailModule,
+    RedisModule,
     YcI18nModule,
-    OrdersModule,
-    PaymentModule,
     UsersModule,
+    TaskModule,
     AuthModule,
   ],
-  providers: [
-    AppService,
-    // LocalStrategy,
-    // UserRepository,
-    // ProductRepo,
-    // ProductService,
-    // UserService
-  ],
+  providers: [AppService],
   exports: [],
 })
-export default class AppModule implements NestModule {
+class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes('cats');
   }
 }
+
+export default AppModule;
