@@ -38,7 +38,7 @@ class CreateUserEntity {
   reset_password_expires: number;
 
   @IsString()
-  reset_password_token: string;
+  reset_password_token: string | null;
 }
 
 export default CreateUserEntity;
