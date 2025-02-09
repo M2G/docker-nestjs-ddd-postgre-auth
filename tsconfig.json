@@ -22,5 +22,5 @@
       "@encryption": ["src/encryption"],
     },
   },
-  "include": ["./.eslintrc.js", "src/**/**/*.ts"],
+  "include": ["./.eslintrc.js", "src/**/**/*.ts", "tests/**/**/*.ts"],
 }
