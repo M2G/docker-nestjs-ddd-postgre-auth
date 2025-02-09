@@ -33,7 +33,7 @@ class User extends Model {
   last_connected_at: number;
 
   @Column
-  reset_password_expires: number;
+  reset_password_expires: string;
 
   @Column({ type: DataType.STRING })
   reset_password_token?: string | null;
