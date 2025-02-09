@@ -1,6 +1,5 @@
 import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
 import { RedisClient, REDIS_CLIENT } from 'src/config/redis-client.type';
-import { UserEntity as User } from '@domain/entities';
 
 interface ICacheRepository {
   get: (key: string) => Promise<string | null>;
@@ -20,6 +19,13 @@ export default class RedisRepository implements OnModuleDestroy, ICacheRepositor
     void this.redis.disconnect();
   }
 
+  async scanIterator(keyMaatch: string): Promise<any> {
+    return this.redis.scanIterator({
+      COUNT: 100,
+      MATCH: keyMaatch,
+    });
+  }
+
   get(key: string): Promise<string | null> {
     return this.redis.get(key);
   }
@@ -32,7 +38,7 @@ export default class RedisRepository implements OnModuleDestroy, ICacheRepositor
     return this.redis.del(key);
   }
 
-  setWithExpiry(key: string, value: string, expiry: number): any {
-    return this.redis.set(key, value, { EX: expiry });
+  async setWithExpiry(key: string, value: string, expiry: number): Promise<any> {
+    await this.redis.set(key, value, { EX: expiry });
   }
 }
