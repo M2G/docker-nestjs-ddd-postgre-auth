@@ -42,8 +42,6 @@ class AuthController {
   @Post('authenticate')
   login(@Request() req): any {
     return this.authService.login(req.user);
-    // const authenticatedUser = await this.usersService.authenticate(user);
-    // console.log('authenticatedUser', req.user);
   }
 }
 
