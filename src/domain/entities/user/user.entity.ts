@@ -8,19 +8,16 @@ class UserEntity {
   email: string;
 
   @IsString()
-  first_name: string;
+  first_name: string | null;
 
   @IsString()
-  last_name: string;
-
-  @IsString()
-  username: string;
+  last_name: string | null;
 
   @IsString()
   password: string;
 
   @IsString()
-  old_password: string;
+  old_password: string | null;
 
   @IsDate()
   created_at: Date;
