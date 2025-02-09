@@ -13,7 +13,7 @@ class AuthService {
     return this.authRepository.validateUser(args);
   }
 
-  login(args): { accessToken: string } {
+  login(args): Promise<{ accessToken: string }> {
     return this.authRepository.login(args);
   }
 

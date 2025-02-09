@@ -6,7 +6,8 @@ import { User } from '@infrastructure/models';
 @Injectable()
 class UserService {
   constructor(
-    @Inject(forwardRef(() => UsersRepository)) private readonly userRepository: UsersRepository,
+    // @Inject(forwardRef(() => UsersRepository)) private readonly userRepository: UsersRepository,
+    private readonly userRepository: UsersRepository,
   ) {}
 
   find({
@@ -19,13 +20,13 @@ class UserService {
     filters: string;
     page: number;
     pageSize: number;
-  }): User[] {
+  }): Promise<User[]> {
     return this.userRepository.find({
       attributes,
       filters,
       page,
       pageSize,
-    }) as any;
+    });
   }
 
   findOne({ id }: { id: number }): Promise<User | null> {
@@ -36,8 +37,8 @@ class UserService {
     return this.userRepository.register(createUserDto);
   }
 
-  remove({ id }: { id: number }): Promise<boolean> {
-    return this.userRepository.remove({ id });
+  remove({ id }: { id: number }): number {
+    return this.userRepository.remove({ id }) as any;
   }
 
   update(updateUserDto: UpdateUserDto): User | null {
