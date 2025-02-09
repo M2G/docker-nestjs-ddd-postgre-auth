@@ -11,11 +11,6 @@ module.exports = {
     '!<rootDir>/src/app/index.ts',
   ],
   forceExit: true,
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.json',
-    },
-  },
   preset: 'ts-jest',
   roots: ['<rootDir>/tests'],
   transform: {
@@ -28,17 +23,15 @@ module.exports = {
     '^tests/(.*)': '<rootDir>/tests/$1',
     '^container': '<rootDir>/src/container',
     '^app/(.*)$': '<rootDir>/src/app/$1',
-    '^core/(.*)$': '<rootDir>/src/core/$1',
-    '^domain/(.*)$': '<rootDir>/src/domain/$1',
-    '^infra/(.*)$': '<rootDir>/src/infra/$1',
-    '^interfaces/(.*)$': '<rootDir>/src/interfaces/$1',
+    '^@encryption': '<rootDir>/src/encryption',
+    '^@config': '<rootDir>/src/config',
+    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
+    '^@application/(.*)$': '<rootDir>/src/application/$1',
+    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
   },
   modulePaths: [],
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
-  testPathIgnorePatterns: [
-    '<rootDir>/src/nodemailer.js',
-    '<rootDir>/(build|node_modules)/',
-  ],
+  testPathIgnorePatterns: ['<rootDir>/src/nodemailer.js', '<rootDir>/(build|node_modules)/'],
   // transformIgnorePatterns: ['<rootDir>/(src|build|node_modules)/'],
   testEnvironment: 'node',
 };
