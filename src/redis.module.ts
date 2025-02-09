@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import redisClientFactory from 'src/config';
-import RedisRepository from '@infrastructure/repository/cache';
+import { RedisRepository } from '@infrastructure/repository';
 import { RedisService } from '@domain/services';
+import { redisClientFactory } from './config';
 
 @Module({
-  providers: [redisClientFactory, RedisRepository, RedisService],
   exports: [RedisService],
+  providers: [redisClientFactory, RedisRepository, RedisService],
 })
 export default class RedisModule {}

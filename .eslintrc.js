@@ -34,6 +34,7 @@ module.exports = {
       'error',
       { ArrayExpression: 'consistent', ArrayPattern: { minItems: 3 } },
     ],
+    'no-duplicate-imports': 1,
     'no-underscore-dangle': 1,
     'no-return-assign': 0,
     'no-restricted-syntax': 0,
