@@ -33,7 +33,7 @@ interface IUserRepository {
     password: string;
     old_password: string;
   }) => Promise<User | null>;
-  update: (updateUserDto: UpdateUserDto) => Promise<User | null>;
+  update: (updateUserDto: UpdateUserDto) => User | null;
   remove: ({ id }: { id: number }) => Promise<boolean>;
 }
 

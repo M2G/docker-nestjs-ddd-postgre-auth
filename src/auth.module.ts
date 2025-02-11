@@ -3,7 +3,7 @@ import { AuthControllers } from '@application/controllers';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AuthRepository, RedisRepository } from '@infrastructure/repository';
 import User from '@infrastructure/models/user/user.model';
-import { LocalStrategy } from '@application/auth/strategies';
+import { LocalStrategy, JwtStrategy } from '@application/auth/strategies';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService, RedisService } from '@domain/services';
 import { redisClientFactory } from './config';
@@ -14,6 +14,7 @@ import { redisClientFactory } from './config';
   imports: [SequelizeModule.forFeature([User])],
   providers: [
     LocalStrategy,
+    JwtStrategy,
     AuthService,
     RedisService,
     RedisRepository,

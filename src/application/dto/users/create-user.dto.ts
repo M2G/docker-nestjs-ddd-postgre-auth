@@ -1,4 +1,4 @@
-import { IsString, IsDate, IsNumber, IsEmpty } from 'class-validator';
+import { IsString, IsDate, IsNumber } from 'class-validator';
 
 class CreateUserEntity {
   @IsNumber()

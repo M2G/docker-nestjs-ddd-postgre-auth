@@ -1,47 +1,24 @@
-import {
-  Res,
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  ValidationPipe,
-  Request,
-  UseGuards,
-  UseInterceptors,
-  UploadedFiles,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-} from '@nestjs/common';
-import { AuthService } from '@domain/services';
-import { YcI18nService } from '@domain/services';
-import { LocalAuthGuard } from '@application/auth/guards/local.guard';
-// import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AuthGuard } from '@nestjs/passport';
+import { Controller, Post, Body, ValidationPipe, Request, UseGuards } from '@nestjs/common';
+import { AuthService, YcI18nService } from '@domain/services';
+import { LocalAuthGuard, JwtAuthGuard } from '@application/auth/guards';
 
 @Controller('auth')
-// @UseGuards(JwtAuthGuard)
 class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly i18n: YcI18nService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('register')
-  create(@Body(new ValidationPipe()) createUserDto): any {
+  create(@Body(new ValidationPipe()) createUserDto) {
     return this.authService.register(createUserDto);
   }
 
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(LocalAuthGuard)
   @Post('authenticate')
-  login(@Request() req): any {
-    return this.authService.login(req.user);
+  login(@Request() { user }) {
+    return this.authService.login(user);
   }
 }
 

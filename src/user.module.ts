@@ -11,15 +11,7 @@ import { redisClientFactory } from './config';
 
 @Module({
   controllers: [UserControllers],
-  exports: [
-    UsersService,
-    // UsersRepository,
-    RedisService,
-    // RedisRepository,
-
-    // MailRepository,
-    MailService,
-  ],
+  exports: [UsersService, RedisService, MailService],
   imports: [SequelizeModule.forFeature([User])],
   providers: [
     RedisService,

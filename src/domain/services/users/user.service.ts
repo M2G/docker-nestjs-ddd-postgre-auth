@@ -37,12 +37,12 @@ class UserService {
     return this.userRepository.register(createUserDto);
   }
 
-  remove({ id }: { id: number }): number {
-    return this.userRepository.remove({ id }) as any;
+  remove({ id }: { id: number }): Promise<boolean> {
+    return this.userRepository.remove({ id });
   }
 
   update(updateUserDto: UpdateUserDto): User | null {
-    return this.userRepository.update(updateUserDto) as any;
+    return this.userRepository.update(updateUserDto);
   }
 
   authenticate({ email }: { email: string }): Promise<User | null> {
@@ -72,7 +72,7 @@ class UserService {
     password: string;
     reset_password_token: string;
   }): Promise<User | null> {
-    return this.userRepository.resetPassword({ password, reset_password_token } as any);
+    return this.userRepository.resetPassword({ password, reset_password_token });
   }
 }
 

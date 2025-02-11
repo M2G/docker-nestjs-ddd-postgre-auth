@@ -130,7 +130,7 @@ class UsersRepository implements IUserRepository {
           pages,
           prev,
         },
-        results: data?.length ? data.map((d) => ({ ...d })) : [],
+        results: data?.length ? data.map((d: any) => ({ ...d })) : [],
       } as any;
     } catch (error) {
       throw new Error(error as string | undefined);
@@ -241,8 +241,8 @@ class UsersRepository implements IUserRepository {
       const options = {
         audience: [],
         expiresIn: this.configService.get<string>('JWT_TOKEN_EXPIRE_TIME'),
-        subject: data?.email,
         secret: this.configService.get<string>('SECRET'),
+        subject: data?.email,
       };
 
       console.log('this.jwtService', this.jwtService);
@@ -253,12 +253,12 @@ class UsersRepository implements IUserRepository {
 
       const mail = {
         from: 'Kingsley Okure',
-        to: 'joanna@gmail.com',
         subject: `Password help has arrived!`,
         text: `http://localhost:3002/reset-password?token=${token}`,
+        to: 'joanna@gmail.com',
       };
 
-      const mailOption = await this.mailService.send(mail);
+      const mailOption: any = await this.mailService.send(mail);
 
       console.log('mail', mailOption);
 
@@ -309,7 +309,7 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  update({ id, ...params }: UpdateUserDto): Promise<User | null> {
+  update({ id, ...params }: UpdateUserDto): User | null {
     try {
       return this.userModel.update(
         { ...params },
