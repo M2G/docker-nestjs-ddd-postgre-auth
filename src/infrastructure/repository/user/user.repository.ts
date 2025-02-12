@@ -115,8 +115,6 @@ class UsersRepository implements IUserRepository {
         raw: true,
       });
 
-      console.log('DATA', data);
-
       void this.redisService.saveUsers(data as any);
 
       const pages = Math.ceil(data.length / pageSize);
@@ -203,10 +201,7 @@ class UsersRepository implements IUserRepository {
     old_password: string;
   }): Promise<User | null> {
     try {
-      const dataValues = await this.userModel.findOne(
-        { raw: true, where: { id } },
-        //  , { raw: true }
-      );
+      const dataValues = await this.userModel.findOne({ raw: true, where: { id } });
 
       if (
         dataValues?.dataValues?.password &&
@@ -224,10 +219,7 @@ class UsersRepository implements IUserRepository {
 
   async forgotPassword({ email }: { email: string }): Promise<User | null> {
     try {
-      const data = await this.userModel.findOne(
-        { raw: true, where: { email } },
-        //  , { raw: true }
-      );
+      const data = await this.userModel.findOne({ raw: true, where: { email } });
 
       console.log('data', data);
 
@@ -260,8 +252,6 @@ class UsersRepository implements IUserRepository {
 
       const mailOption: any = await this.mailService.send(mail);
 
-      console.log('mail', mailOption);
-
       this.logger.log(mailOption.messageId);
 
       return this.update({
@@ -282,20 +272,15 @@ class UsersRepository implements IUserRepository {
     reset_password_token: string;
   }): Promise<User | null> {
     try {
-      const dataValues: User | null = await this.userModel.findOne(
-        {
-          raw: true,
-          where: {
-            reset_password_expires: {
-              [Op.gt]: new Date(Date.now()).toISOString(),
-            },
-            reset_password_token,
+      const dataValues: User | null = await this.userModel.findOne({
+        raw: true,
+        where: {
+          reset_password_expires: {
+            [Op.gt]: new Date(Date.now()).toISOString(),
           },
+          reset_password_token,
         },
-        // { raw: true },
-      );
-
-      console.log('dataValues', dataValues);
+      });
 
       if (!dataValues) return null;
 
@@ -303,7 +288,7 @@ class UsersRepository implements IUserRepository {
       dataValues.reset_password_token = null;
       dataValues.reset_password_expires = new Date(Date.now()).toISOString();
 
-      return this.update({ ...dataValues } as any);
+      return this.update({ ...dataValues } as UpdateUserDto);
     } catch (error) {
       throw new Error(error as string | undefined);
     }
