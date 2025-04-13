@@ -72,6 +72,7 @@ module.exports = {
     'no-void': 1,
     'nonblock-statement-body-position': 1,
 
+    '@typescript-eslint/no-unused-expressions': 1,
     '@typescript-eslint/class-methods-use-this': 1,
     '@typescript-eslint/max-params': 1,
     '@typescript-eslint/return-await': 1,
@@ -105,6 +106,8 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 0,
     '@typescript-eslint/no-unsafe-member-access': 1,
     '@typescript-eslint/no-unsafe-call': 1,
+    '@typescript-eslint/init-declarations': 1,
+    '@typescript-eslint/await-thenable': 1,
   },
   settings: {
     'html/html-extensions': ['.html'],
