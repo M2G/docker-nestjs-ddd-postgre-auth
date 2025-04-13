@@ -22,8 +22,8 @@ class UserEntity {
   @IsDate()
   created_at: Date;
 
-  @IsDate()
-  deleted_at: Date;
+  @IsNumber()
+  deleted_at: number;
 
   @IsDate()
   modified_at: Date;
