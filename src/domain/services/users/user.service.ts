@@ -1,7 +1,12 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from '@application/dto/users';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  ResetPasswordDTO,
+  ForgotPasswordDTO,
+} from '@application/dto';
 import { UsersRepository } from '@infrastructure/repository';
-import { User } from '@infrastructure/models';
+import { UserEntity as User } from '@domain/entities';
 
 @Injectable()
 class UserService {
@@ -29,49 +34,37 @@ class UserService {
     });
   }
 
-  findOne({ id }: { id: number }): Promise<User | null> {
-    return this.userRepository.findOne({ id });
+  findOne(id: number): Promise<User | null> {
+    return this.userRepository.findOne(id);
   }
 
-  register(createUserDto: CreateUserDto): User {
-    return this.userRepository.register(createUserDto);
+  register(createUser: CreateUserDto): Promise<User> {
+    return this.userRepository.register(createUser);
   }
 
-  remove({ id }: { id: number }): Promise<boolean> {
-    return this.userRepository.remove({ id });
+  remove(id: number): Promise<boolean> {
+    return this.userRepository.remove(id);
   }
 
-  update(updateUserDto: UpdateUserDto): User | null {
-    return this.userRepository.update(updateUserDto);
+  update(updateUser: UpdateUserDto): User | null {
+    return this.userRepository.update(updateUser);
   }
 
-  authenticate({ email }: { email: string }): Promise<User | null> {
-    return this.userRepository.authenticate({ email });
+  authenticate(email: string): Promise<User | null> {
+    return this.userRepository.authenticate(email);
   }
 
-  changePassword({
-    id,
-    password,
-    old_password,
-  }: {
-    id: number;
-    password: string;
-    old_password: string;
-  }): Promise<User | null> {
-    return this.userRepository.changePassword({ id, old_password, password } as User);
+  changePassword({ id, password, old_password }: User): Promise<User | null> {
+    return this.userRepository.changePassword({ id, old_password, password } as User & {
+      old_password: string;
+    });
   }
 
-  forgotPassword({ email }: { email: string }): Promise<User | null> {
-    return this.userRepository.forgotPassword({ email });
+  forgotPassword(email: ForgotPasswordDTO): Promise<User | null> {
+    return this.userRepository.forgotPassword(email);
   }
 
-  resetPassword({
-    password,
-    reset_password_token,
-  }: {
-    password: string;
-    reset_password_token: string;
-  }): Promise<User | null> {
+  resetPassword({ password, reset_password_token }: ResetPasswordDTO): Promise<User | null> {
     return this.userRepository.resetPassword({ password, reset_password_token });
   }
 }

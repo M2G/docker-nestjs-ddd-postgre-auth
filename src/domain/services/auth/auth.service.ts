@@ -1,5 +1,5 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from '@application/dto/users';
+import { CreateUserDto, UpdateUserDto, LoginDto } from '@application/dto';
 import { AuthRepository } from '@infrastructure/repository';
 import { User } from '@infrastructure/models';
 
@@ -9,12 +9,12 @@ class AuthService {
     @Inject(forwardRef(() => AuthRepository)) private readonly authRepository: AuthRepository,
   ) {}
 
-  validateUser(args): any {
+  validateUser(args): Promise<User | null> {
     return this.authRepository.validateUser(args);
   }
 
-  login(args): Promise<{ accessToken: string }> {
-    return this.authRepository.login(args);
+  login(loginDto: LoginDto): { accessToken: string } {
+    return this.authRepository.login(loginDto);
   }
 
   register(createUserDto: CreateUserDto): Promise<{ accessToken: string }> {

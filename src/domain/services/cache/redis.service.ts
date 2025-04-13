@@ -5,26 +5,28 @@ import { UserEntity as User } from '@domain/entities';
 
 @Injectable()
 class RedisService {
+  TIME_EXPIRATION = 60;
+
   constructor(
     @Inject(forwardRef(() => RedisRepository)) private readonly redisRepository: RedisRepository,
   ) {}
 
-  findLastUserConnected(): Promise<any> {
+  findLastUserConnected(): AsyncIterable<string> | null {
     return this.redisRepository.scanIterator(RedisPrefixEnum.LAST_CONNECTED_AT);
   }
 
-  saveLastUserConnected(userId: number | undefined): Promise<any> {
-    return this.redisRepository.setWithExpiry(
+  saveLastUserConnected(userId: number | undefined): void {
+    void this.redisRepository.setWithExpiry(
       `${RedisPrefixEnum.LAST_CONNECTED_AT}:${userId}`,
       JSON.stringify({
         id: userId,
         last_connected_at: Math.floor(Date.now() / 1000),
       }),
-      60 * 60,
+      this.TIME_EXPIRATION * this.TIME_EXPIRATION,
     );
   }
 
-  findLastUserConnectected(key: string): Promise<any | null> {
+  findLastUserConnectected(key: string): Promise<string | null> {
     return this.redisRepository.get(key);
   }
 
@@ -32,11 +34,11 @@ class RedisService {
     return this.redisRepository.get(`${RedisPrefixEnum.USER}:${userId}`);
   }
 
-  saveUser(user: User | null): Promise<string | null> {
-    return this.redisRepository.setWithExpiry(
-      `${RedisPrefixEnum.USER}:${user?.id}`,
+  saveUser(user: User): void {
+    void this.redisRepository.setWithExpiry(
+      `${RedisPrefixEnum.USER}:${user.id}`,
       JSON.stringify(user),
-      60,
+      this.TIME_EXPIRATION,
     );
   }
 
@@ -44,8 +46,12 @@ class RedisService {
     return this.redisRepository.get(RedisPrefixEnum.USERS);
   }
 
-  saveUsers(users: User[]): Promise<string | null> {
-    return this.redisRepository.setWithExpiry(RedisPrefixEnum.USERS, JSON.stringify(users), 60);
+  saveUsers(users: User[]): void {
+    void this.redisRepository.setWithExpiry(
+      RedisPrefixEnum.USERS,
+      JSON.stringify(users),
+      this.TIME_EXPIRATION,
+    );
   }
 
   removeUser(userId: number): Promise<string | null> {

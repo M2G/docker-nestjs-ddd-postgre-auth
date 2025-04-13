@@ -16,8 +16,6 @@ class TaskService {
   ) {}
 
   async lastConnectedUser() {
-    console.log('lastConnectedUser', this.userModel);
-
     try {
       for await (const key of await this.redisService.findLastUserConnected()) {
         console.log('key', key);

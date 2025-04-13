@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import TokenRepository from '@infrastructure/repository/token';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { TokenRepository } from '@infrastructure/repository';
 
 @Injectable()
 class TokenService {
-  constructor(private readonly tokenRepository: TokenRepository) {}
+  constructor(
+    @Inject(forwardRef(() => TokenRepository)) private readonly tokenRepository: TokenRepository,
+  ) {}
 
   async refreshToken(requestToken: { requestToken: string }): Promise<any> {
     return this.tokenRepository.refreshToken(requestToken);

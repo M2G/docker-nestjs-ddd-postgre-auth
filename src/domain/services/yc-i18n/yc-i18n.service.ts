@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { PathImpl2 } from '@nestjs/config';
-import { I18nPath, I18nTranslations } from 'src/generated/i18n.generated';
+import { I18nTranslations } from 'src/generated/i18n.generated';
 
 export type SupportedLang = 'en' | 'ar';
 export const supportedLangs: SupportedLang[] = ['en', 'ar'];
