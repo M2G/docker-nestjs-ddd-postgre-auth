@@ -7,16 +7,15 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 import LoggerMiddleware from '@application/middleware';
 import { YcI18nModule } from './yc-i18n/yc-i18n.module';
-import AppController from './app.controller';
-import AppService from './app.service';
 import UsersModule from './user.module';
 import RedisModule from './redis.module';
 import AuthModule from './auth.module';
 import MailModule from './mail.module';
 import TaskModule from './task.module';
+import TokenModule from './token.module';
+import TestModule from './test.module';
 
 @Module({
-  controllers: [AppController],
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
@@ -59,9 +58,9 @@ import TaskModule from './task.module';
     UsersModule,
     TaskModule,
     AuthModule,
+    TokenModule,
+    TestModule,
   ],
-  providers: [AppService],
-  exports: [],
 })
 class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
