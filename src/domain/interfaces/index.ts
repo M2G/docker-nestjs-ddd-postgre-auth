@@ -1,4 +1,5 @@
-import IUserRepository from '@domain/interfaces/user-reposity';
+import IUserRepository from './user-reposity.interface';
+import IAuthRepository from './auth-reposity.interface';
 import { MailResponse, IMailProvider } from './mail-provider.interface';
 
-export { IUserRepository, MailResponse, IMailProvider };
+export { IUserRepository, IAuthRepository, MailResponse, IMailProvider };
