@@ -8,7 +8,7 @@ const redisClientFactory: FactoryProvider<Promise<RedisClient>> = {
     const client = createClient({
       socket: {
         host: 'redis',
-        // host: 'localhost', // for local testing
+        //host: 'localhost', // for local testing
         port: Number(process.env.CONTAINER_PORT_REDIS) || 6379,
       },
     });
