@@ -1,18 +1,19 @@
 import { Controller, Post, Body, ValidationPipe, Request, UseGuards } from '@nestjs/common';
 import { AuthService, YcI18nService } from '@domain/services';
 import { LocalAuthGuard, JwtAuthGuard } from '@application/auth/guards';
+import { CreateUserDto } from '@application/dto';
 
 @Controller('auth')
 class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly i18n: YcI18nService,
+    //  private readonly i18n: YcI18nService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('register')
-  create(@Body(new ValidationPipe()) createUserDto) {
-    return this.authService.register(createUserDto);
+  create(@Body(new ValidationPipe()) user: CreateUserDto) {
+    return this.authService.register(user);
   }
 
   @UseGuards(LocalAuthGuard)

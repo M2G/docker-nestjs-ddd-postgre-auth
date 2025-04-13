@@ -1,15 +1,14 @@
-import { Controller, Post, Body, ValidationPipe } from '@nestjs/common';
-import TokenService from '@domain/services/token';
-// import AuthService from '@domain/services/auth/auth.service';
-// import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Controller, Post, Body, ValidationPipe, UseGuards } from '@nestjs/common';
+import { TokenService } from '@domain/services';
+import { JwtAuthGuard } from '@application/auth/guards';
 
 @Controller('auth')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 class TokenControllers {
   constructor(private readonly tokenService: TokenService) {}
 
   @Post('refresh_token')
-  refreshToken(@Body(new ValidationPipe()) refreshToken): any {
+  refreshToken(@Body(new ValidationPipe()) refreshToken) {
     return this.tokenService.refreshToken(refreshToken);
   }
 }
