@@ -1,15 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { MockProxy, mock } from 'jest-mock-extended';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { MockProxy } from 'jest-mock-extended';
+import { mock } from 'jest-mock-extended';
 import { UserService } from '@domain/services';
-import { RedisRepository, UsersRepository } from '@infrastructure/repository';
-import RedisPrefixEnum from '@domain/enum';
+import { UsersRepository } from '@infrastructure/repository';
 import userData from 'tests/mocks/userData.mock';
 import { mockRedis } from 'tests/mocks/redis-mock';
 import { REDIS_CLIENT } from 'src/config/redis-client.type';
-import UserModule from 'src/user.module';
-import { SequelizeModule } from '@nestjs/sequelize';
-import User from '../../../../src/infrastructure/models/user';
-import { I18nContext, I18nService } from 'nestjs-i18n';
 import { mockService } from 'tests/mocks';
 
 const oneDayInSeconds = 60;
@@ -23,7 +20,8 @@ describe('RedisService', () => {
   beforeAll(async () => {
     testingModule = await Test.createTestingModule({
       imports: [
-        /*SequelizeModule.forRoot({
+        /*
+        SequelizeModule.forRoot({
           autoLoadModels: true,
           database: 'test_db',
           dialect: 'postgres',
@@ -36,13 +34,13 @@ describe('RedisService', () => {
         UserModule,
         */
       ],
-      providers: [UsersService, mockService(UsersRepository, userRepositoryMock)],
+      providers: [UserService as any, mockService(UsersRepository, userRepositoryMock)],
     })
       .overrideProvider(REDIS_CLIENT)
       .useValue(mockRedis)
       .compile();
 
-    userService = testingModule.get<UserService>(UserService);
+    userService = testingModule.get<UserService>(UserService) as any;
   });
 
   afterEach(() => {
@@ -59,11 +57,11 @@ describe('RedisService', () => {
     const result = await userService.findOne({ id: userId });
     expect(result).toEqual(userData);
     expect(userRepositoryMock.findOne).toHaveBeenCalledTimes(1);
-    expect(userRepositoryMock.findOne).toHaveBeenCalledWith({ id: userId } as any);
+    expect(userRepositoryMock.findOne).toHaveBeenCalledWith({ id: userId });
   });
 
   it('should successfully create user', async () => {
-    userRepositoryMock.register.mockResolvedValue(userData as never);
+    userRepositoryMock.register.mockResolvedValue(userData as unknown as never);
     const result = await userService.register(userData);
     expect(result).toEqual(userData);
     expect(userRepositoryMock.register).toHaveBeenCalledTimes(1);
@@ -72,15 +70,15 @@ describe('RedisService', () => {
 
   it('should successfully remove user', async () => {
     const userId = 1;
-    userRepositoryMock.remove.mockResolvedValue(1 as any);
-    const result = await userService.remove({ id: userId } as any);
+    userRepositoryMock.remove.mockResolvedValue(1 as unknown as any);
+    const result = await userService.remove({ id: userId });
     expect(result).toEqual(1);
     expect(userRepositoryMock.remove).toHaveBeenCalledTimes(1);
-    expect(userRepositoryMock.remove).toHaveBeenCalledWith({ id: userId } as any);
+    expect(userRepositoryMock.remove).toHaveBeenCalledWith({ id: userId });
   });
 
   it('should successfully update user', async () => {
-    userRepositoryMock.update.mockResolvedValue(userData);
+    userRepositoryMock.update.mockResolvedValue(userData as unknown as never);
     const result = await userService.update(userData);
     expect(result).toEqual(userData);
     expect(userRepositoryMock.update).toHaveBeenCalledTimes(1);
@@ -88,11 +86,11 @@ describe('RedisService', () => {
   });
 
   it('should successfully authenticate user', async () => {
-    userRepositoryMock.authenticate.mockResolvedValue(userData as any);
+    userRepositoryMock.authenticate.mockResolvedValue(userData);
     const result = await userService.authenticate({ email: userData.email });
     expect(result).toEqual(userData);
     expect(userRepositoryMock.authenticate).toHaveBeenCalledTimes(1);
-    expect(userRepositoryMock.authenticate).toHaveBeenCalledWith({ email: userData.email } as any);
+    expect(userRepositoryMock.authenticate).toHaveBeenCalledWith({ email: userData.email });
   });
 
   it('should successfully changePassword user', async () => {
@@ -108,7 +106,7 @@ describe('RedisService', () => {
       id: userData.id,
       old_password: userData.password,
       password: userData.password,
-    } as any);
+    });
   });
 
   it('should successfully forgotPassword user', async () => {

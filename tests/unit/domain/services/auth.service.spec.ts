@@ -1,18 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { MockProxy, mock } from 'jest-mock-extended';
-import { AuthService, YcI18nService } from '@domain/services';
-import { RedisRepository, AuthRepository } from '@infrastructure/repository';
-import RedisPrefixEnum from '@domain/enum';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { MockProxy } from 'jest-mock-extended';
+import { mock } from 'jest-mock-extended';
+import { AuthService } from '@domain/services';
+import { AuthRepository } from '@infrastructure/repository';
 import { mockRedis } from 'tests/mocks/redis-mock';
 import { REDIS_CLIENT } from 'src/config/redis-client.type';
-import UserModule from 'src/user.module';
-import { SequelizeModule } from '@nestjs/sequelize';
-import User from '../../../../src/infrastructure/models/user';
-import { I18nContext, I18nService } from 'nestjs-i18n';
 import { mockService, userData } from 'tests/mocks';
-import config from '@config';
 
-describe('RedisService', () => {
+describe('AuthService', () => {
   let testingModule: TestingModule;
   let authService: AuthService;
 
@@ -26,7 +22,7 @@ describe('RedisService', () => {
       .useValue(mockRedis)
       .compile();
 
-    authService = testingModule.get<AuthService>(AuthService);
+    authService = testingModule.get<AuthService>(AuthService) as any;
   });
 
   afterEach(() => {
@@ -53,20 +49,20 @@ describe('RedisService', () => {
 
   it('should successfully register user', async () => {
     authRepositoryMock.register.mockResolvedValue({ accessToken: 'token' });
-    const modified_at = new Date().toISOString();
+    const modifiedAt = new Date().toISOString();
     const result = await authService.register({
-      email: userData.email,
-      password: userData.password,
       created_at: userData.created_at,
-      modified_at: modified_at,
+      email: userData.email,
+      modified_at: modifiedAt,
+      password: userData.password,
     } as any);
     expect(result).toEqual({ accessToken: 'token' });
     expect(authRepositoryMock.register).toHaveBeenCalledTimes(1);
     expect(authRepositoryMock.register).toHaveBeenCalledWith({
-      email: userData.email,
-      password: userData.password,
       created_at: userData.created_at,
-      modified_at: modified_at,
+      email: userData.email,
+      modified_at: modifiedAt,
+      password: userData.password,
     } as any);
   });
 
@@ -74,18 +70,18 @@ describe('RedisService', () => {
     authRepositoryMock.login.mockResolvedValue({ accessToken: 'token' } as never);
     const updateAt = new Date().toISOString();
     const result = await authService.login({
-      email: userData.email,
-      password: userData.password,
       created_at: userData.created_at,
+      email: userData.email,
       modified_at: updateAt,
+      password: userData.password,
     });
     expect(result).toEqual({ accessToken: 'token' } as never);
     expect(authRepositoryMock.login).toHaveBeenCalledTimes(1);
     expect(authRepositoryMock.login).toHaveBeenCalledWith({
-      email: userData.email,
-      password: userData.password,
       created_at: userData.created_at,
+      email: userData.email,
       modified_at: updateAt,
+      password: userData.password,
     });
   });
 });

@@ -7,7 +7,6 @@ import RedisRepository from 'src/infrastructure/repository/cache';
 import { mockRedis } from '../../../mocks/redis-mock';
 import { REDIS_CLIENT } from '../../../../src/config/redis-client.type';
 import { RedisService } from '@domain/services';
-import redisClientFactory from '../../../../src/config';
 import RedisModule from '../../../../src/redis.module';
 
 describe('RedisRepository', () => {

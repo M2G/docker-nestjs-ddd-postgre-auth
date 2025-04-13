@@ -1,5 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { MockProxy, mock } from 'jest-mock-extended';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { MockProxy } from 'jest-mock-extended';
+import { mock } from 'jest-mock-extended';
 import { RedisService } from '@domain/services';
 import { RedisRepository } from '@infrastructure/repository';
 import RedisPrefixEnum from '@domain/enum';
@@ -29,7 +31,7 @@ describe('RedisService', () => {
       .useValue(mockRedis)
       .compile();
 
-    redisService = testingModule.get<RedisService>(RedisService);
+    redisService = testingModule.get<RedisService>(RedisService) as any;
   });
 
   afterEach(() => {
@@ -42,7 +44,7 @@ describe('RedisService', () => {
 
   it('should successfully save user', async () => {
     const userId = userData.id;
-    await redisService.saveUser(userData as any);
+    await redisService.saveUser(userData);
     expect(redisRepositoryMock.setWithExpiry).toHaveBeenCalledTimes(1);
     expect(redisRepositoryMock.setWithExpiry).toHaveBeenCalledWith(
       `${RedisPrefixEnum.USER}:${userId}`,
@@ -52,7 +54,7 @@ describe('RedisService', () => {
   });
 
   it('should successfully save users', async () => {
-    await redisService.saveUsers(userData as any);
+    await redisService.saveUsers(userData);
     expect(redisRepositoryMock.setWithExpiry).toHaveBeenCalledTimes(1);
     expect(redisRepositoryMock.setWithExpiry).toHaveBeenCalledWith(
       RedisPrefixEnum.USERS,
