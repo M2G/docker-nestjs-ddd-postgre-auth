@@ -3,19 +3,20 @@ import { InjectModel } from '@nestjs/sequelize';
 import { JwtService } from '@nestjs/jwt';
 import { UniqueConstraintError, Op } from 'sequelize';
 import { ConfigService } from '@nestjs/config';
-import { User } from '@infrastructure/models';
+import { User as UserModel } from '@infrastructure/models';
+import { UserEntity as User } from '@domain/entities';
 import { encryptPassword, validatePassword } from '@encryption';
-import { CreateUserDto, UpdateUserDto } from '@application/dto/users';
 import { RedisService, YcI18nService, MailService } from '@domain/services';
 import { IUserRepository } from '@domain/interfaces';
+import { ForgotPasswordDTO, ResetPasswordDTO, UpdateUserDto } from '@application/dto';
 
 @Injectable()
 class UsersRepository implements IUserRepository {
   private readonly logger = new Logger();
 
   constructor(
-    @InjectModel(User)
-    private readonly userModel: typeof User,
+    @InjectModel(UserModel)
+    private readonly userModel: typeof UserModel,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
     private readonly i18n: YcI18nService,
@@ -115,7 +116,7 @@ class UsersRepository implements IUserRepository {
         raw: true,
       });
 
-      void this.redisService.saveUsers(data as any);
+      data?.length && this.redisService.saveUsers(data as User[]);
 
       const pages = Math.ceil(data.length / pageSize);
       const prev = currPage > 1 ? currPage - 1 : null;
@@ -128,27 +129,28 @@ class UsersRepository implements IUserRepository {
           pages,
           prev,
         },
-        results: data?.length ? data.map((d: any) => ({ ...d })) : [],
+        results: data?.length ? data : [],
       } as any;
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
 
-  async findOne({ id }: { id: number }): Promise<User | null> {
+  async findOne(id: number): Promise<User | null> {
     try {
-      const cachingUser = await this.redisService.findUser(id as any);
+      const cachingUser = await this.redisService.findUser(String(id));
       if (cachingUser) return cachingUser as unknown as User;
 
       const data = await this.userModel.findByPk(id, { raw: true });
-      void this.redisService.saveUser(data as any);
+      if (!data) return null;
+      this.redisService.saveUser(data as User);
       return data;
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
 
-  register({ created_at, deleted_at, email, password }: CreateUserDto): User {
+  register({ created_at, deleted_at, email, password }: User): Promise<User> {
     try {
       const hashPassword = encryptPassword(password);
       return this.userModel.create(
@@ -173,7 +175,7 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  async remove({ id }: { id: number }): Promise<boolean> {
+  async remove(id: number): Promise<boolean> {
     try {
       const ok = await this.userModel.destroy({ where: { id } });
       void this.redisService.removeUser(id);
@@ -183,7 +185,7 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  async authenticate({ email }: { email: string }): Promise<any | null> {
+  async authenticate(email: string): Promise<User | null> {
     try {
       return this.userModel.findOne({ raw: true, where: { email } });
     } catch (error) {
@@ -196,10 +198,8 @@ class UsersRepository implements IUserRepository {
     password,
     old_password,
   }: {
-    id: number;
-    password: string;
     old_password: string;
-  }): Promise<User | null> {
+  } & User): Promise<unknown | null> {
     try {
       const dataValues = await this.userModel.findOne({ raw: true, where: { id } });
 
@@ -217,7 +217,7 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  async forgotPassword({ email }: { email: string }): Promise<User | null> {
+  async forgotPassword(email: ForgotPasswordDTO): Promise<unknown | null> {
     try {
       const data = await this.userModel.findOne({ raw: true, where: { email } });
 
@@ -226,15 +226,15 @@ class UsersRepository implements IUserRepository {
       if (!data) return null;
 
       const payload = {
-        email: data?.email,
-        id: data?.id,
-        password: data?.password,
+        email: data.email,
+        id: data.id,
+        password: data.password,
       };
       const options = {
         audience: [],
         expiresIn: this.configService.get<string>('JWT_TOKEN_EXPIRE_TIME'),
         secret: this.configService.get<string>('SECRET'),
-        subject: data?.email,
+        subject: data.email,
       };
 
       console.log('this.jwtService', this.jwtService);
@@ -250,29 +250,23 @@ class UsersRepository implements IUserRepository {
         to: 'joanna@gmail.com',
       };
 
-      const mailOption: any = await this.mailService.send(mail);
+      const mailOption = await this.mailService.send(mail);
 
       this.logger.log(mailOption.messageId);
 
       return this.update({
-        id: data?.id,
+        id: data.id,
         reset_password_expires: new Date(Date.now() + 86400000).toISOString(),
         reset_password_token: token,
-      } as any);
+      } as unknown as UpdateUserDto);
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
 
-  async resetPassword({
-    password,
-    reset_password_token,
-  }: {
-    password: string;
-    reset_password_token: string;
-  }): Promise<User | null> {
+  async resetPassword({ password, reset_password_token }: ResetPasswordDTO): Promise<unknown> {
     try {
-      const dataValues: User | null = await this.userModel.findOne({
+      const dataValues = await this.userModel.findOne({
         raw: true,
         where: {
           reset_password_expires: {
@@ -288,20 +282,21 @@ class UsersRepository implements IUserRepository {
       dataValues.reset_password_token = null;
       dataValues.reset_password_expires = new Date(Date.now()).toISOString();
 
-      return this.update({ ...dataValues } as UpdateUserDto);
+      return this.update(dataValues as unknown as UpdateUserDto);
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
 
-  update({ id, ...params }: UpdateUserDto): User | null {
+  async update({ id, ...params }: UpdateUserDto): Promise<User | null> {
     try {
-      return this.userModel.update(
-        { ...params },
-        {
-          where: { id } as any,
-        },
-      ) as any;
+      const [, [updateUser]] = await this.userModel.update({ ...params }, {
+        where: { id },
+      } as any);
+
+      console.log(':::::::::', updateUser);
+
+      return updateUser as unknown as User;
     } catch (error) {
       throw new Error(error as string | undefined);
     }

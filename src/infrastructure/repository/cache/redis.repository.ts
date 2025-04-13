@@ -3,9 +3,10 @@ import { RedisClient, REDIS_CLIENT } from 'src/config/redis-client.type';
 
 interface ICacheRepository {
   get: (key: string) => Promise<string | null>;
-  set: (key: string, value: string) => Promise<void>;
+  set: (key: string, value: string) => void;
   delete: (key: string) => Promise<void>;
-  setWithExpiry: (key: string, value: string, expiry: number) => Promise<void>;
+  setWithExpiry: (key: string, value: string, expiry: number) => void;
+  scanIterator: (key: string) => AsyncIterable<string> | null;
 }
 
 @Injectable()
@@ -19,7 +20,7 @@ export default class RedisRepository implements OnModuleDestroy, ICacheRepositor
     void this.redis.disconnect();
   }
 
-  async scanIterator(keyMaatch: string): Promise<any> {
+  scanIterator(keyMaatch: string): AsyncIterable<string> | null {
     return this.redis.scanIterator({
       COUNT: 100,
       MATCH: keyMaatch,
@@ -30,7 +31,7 @@ export default class RedisRepository implements OnModuleDestroy, ICacheRepositor
     return this.redis.get(key);
   }
 
-  async set(key: string, value: string): Promise<string | any> {
+  async set(key: string, value: string): Promise<void> {
     await this.redis.set(key, value);
   }
 
@@ -38,7 +39,7 @@ export default class RedisRepository implements OnModuleDestroy, ICacheRepositor
     return this.redis.del(key);
   }
 
-  async setWithExpiry(key: string, value: string, expiry: number): Promise<any> {
+  async setWithExpiry(key: string, value: string, expiry: number): Promise<void> {
     await this.redis.set(key, value, { EX: expiry });
   }
 }

@@ -4,12 +4,12 @@ import { JwtService } from '@nestjs/jwt';
 import { UniqueConstraintError } from 'sequelize';
 import { User as UserModel, Token as TokenModel } from '@infrastructure/models';
 import { TokenEntity as Token, UserEntity as User } from '@domain/entities';
-import { YcI18nService } from '@domain/services';
+import { UserService, YcI18nService } from '@domain/services';
 import { CreateUserDto } from '@application/dto/users';
 import config from '@config';
 
 export interface ITokenRepository {
-  register: (createUserDto: CreateUserDto) => Promise<User | null>;
+  // register: (createUserDto: CreateUserDto) => Promise<User | null>;
   refreshToken: (requestToken: {
     requestToken: string;
   }) => Promise<{ accessToken: string; refreshToken?: string | null }>;
@@ -18,36 +18,17 @@ export interface ITokenRepository {
 @Injectable()
 class TokenRepository implements ITokenRepository {
   constructor(
-    @InjectModel(UserModel)
     @InjectModel(TokenModel)
-    private readonly userModel: typeof UserModel,
     private readonly tokenModel: typeof TokenModel,
+    @InjectModel(UserModel)
+    private readonly userModel: typeof UserModel,
+    // private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly i18n: YcI18nService,
   ) {}
 
-  verifyExpiration({ expiryDate }: { expiryDate: number }): boolean {
+  private verifyExpiration({ expiryDate }: { expiryDate: number }): boolean {
     return expiryDate < new Date().getTime();
-  }
-
-  register({ created_at, deleted_at, email, password }: CreateUserDto): any {
-    try {
-      return this.userModel.create(
-        {
-          created_at,
-          deleted_at,
-          email,
-          password,
-        },
-        { raw: true },
-      ) as any;
-    } catch (error) {
-      if (error instanceof UniqueConstraintError) {
-        throw new Error('Duplicate error');
-      }
-
-      throw new Error(error as string | undefined);
-    }
   }
 
   async refreshToken({
@@ -61,6 +42,7 @@ class TokenRepository implements ITokenRepository {
       });
 
       if (this.verifyExpiration(refreshToken as unknown as Token)) {
+        // await this.userService.remove({ id: refreshToken?.id } as any);
         await this.userModel.destroy({ where: { id: refreshToken?.id } });
         throw new Error(this.i18n.t('errors.refreshToken') as string);
       }

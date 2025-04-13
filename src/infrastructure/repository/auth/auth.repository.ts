@@ -11,12 +11,10 @@ import { UniqueConstraintError, Op } from 'sequelize';
 import * as bcrypt from 'bcrypt';
 import { User } from '@infrastructure/models';
 import { encryptPassword, validatePassword } from '@encryption';
-import { CreateUserDto, UpdateUserDto } from '@application/dto/users';
-import updateUserDto from '@application/dto/users/update-user.dto';
 import { RedisService, YcI18nService } from '@domain/services';
+import { IAuthRepository } from '@domain/interfaces';
 import config from '@config';
-
-export interface IAuthRepository {}
+import { CreateUserDto, LoginDto } from '@application/dto';
 
 @Injectable()
 class AuthRepository implements IAuthRepository {
@@ -27,25 +25,20 @@ class AuthRepository implements IAuthRepository {
 
     @Inject(forwardRef(() => RedisService))
     private readonly redisService: RedisService,
-    private readonly i18n: YcI18nService,
+    // private readonly i18n: YcI18nService,
   ) {}
 
-  async login(user: User): Promise<{ accessToken: string }> {
-    await this.redisService.saveLastUserConnected(user?.id);
-    const payload = { email: user.email, id: user.id };
+  login({ id, email }: LoginDto): { accessToken: string } {
+    if (id) this.redisService.saveLastUserConnected(id);
+    const payload = { email, id };
     const options = { secret: config.authSecret };
-    return { accessToken: this.jwtService.sign(payload, { secret: config.authSecret }) };
+    return { accessToken: this.jwtService.sign(payload, options) };
   }
 
-  async validateUser({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }): Promise<User | null> {
+  async validateUser({ email, password }: User): Promise<User | null> {
     try {
       const user = await this.userModel.findOne({ raw: true, where: { email } });
+      /*
       if (!user) {
         throw new BadRequestException(
           this.i18n.t('users.notFound', {
@@ -53,7 +46,8 @@ class AuthRepository implements IAuthRepository {
           }) as string,
         );
       }
-      const isMatch: boolean = bcrypt.compareSync(password, user.password);
+      */
+      const isMatch = user?.password && bcrypt.compareSync(password, user.password);
       if (!isMatch) {
         throw new BadRequestException('Password does not match');
       }
@@ -71,15 +65,15 @@ class AuthRepository implements IAuthRepository {
   }: CreateUserDto): Promise<{ accessToken: string }> {
     try {
       const hashPassword = encryptPassword(password);
-      const user = (await this.userModel.create(
+      const user = await this.userModel.create(
         {
           created_at,
-          modified_at,
           email,
+          modified_at,
           password: hashPassword,
         },
         { raw: true },
-      )) as any;
+      );
       return this.login({
         email,
         id: user.id,
