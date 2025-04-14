@@ -27,8 +27,13 @@ class UsersController {
   ) {}
 
   @Get()
-  findAll(@Request() { query: { ...args } }): Promise<User[] | null> {
-    return this.usersService.find(args);
+  findAll(@Request() { query: { attributes, filters, page, pageSize } }): Promise<User[] | null> {
+    return this.usersService.find({
+      attributes,
+      filters,
+      page,
+      pageSize,
+    });
   }
 
   @Get(':id')

@@ -22,15 +22,19 @@ class TaskService {
 
         const usersInfo = await this.redisService.findLastUserConnectected(key);
 
+        if (!usersInfo) return null;
+
+        const { id, last_connected_at } = JSON.parse(usersInfo);
+
         console.log('usersInfo', usersInfo);
 
         const updatedUser: any = (await this.userModel.update(
           {
-            id: usersInfo?.id,
-            last_connected_at: usersInfo?.last_connected_at,
+            id,
+            last_connected_at,
           },
           {
-            where: { id: usersInfo.id } as any,
+            where: { id } as any,
           },
         )) as any;
 
