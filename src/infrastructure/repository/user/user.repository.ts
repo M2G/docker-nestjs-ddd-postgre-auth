@@ -296,7 +296,7 @@ class UsersRepository implements IUserRepository {
 
       console.log(':::::::::', updateUser);
 
-      return updateUser as unknown as User;
+      return updateUser as User;
     } catch (error) {
       throw new Error(error as string | undefined);
     }

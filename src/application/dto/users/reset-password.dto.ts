@@ -6,9 +6,6 @@ class ResetPasswordDTO {
 
   @IsString()
   reset_password_token: string | null;
-
-  @IsString()
-  token: string;
 }
 
 export default ResetPasswordDTO;
