@@ -28,7 +28,7 @@ class TaskService {
 
         console.log('usersInfo', usersInfo);
 
-        const updatedUser = await this.userModel.update(
+        const [, [updatedUser]] = await this.userModel.update(
           {
             id,
             last_connected_at: lastConnectedAt,

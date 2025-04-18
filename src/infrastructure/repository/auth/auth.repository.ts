@@ -28,7 +28,7 @@ class AuthRepository implements IAuthRepository {
     // private readonly i18n: YcI18nService,
   ) {}
 
-  login({ id, email }: LoginDto): { accessToken: string } {
+  login({ id, email }: { id: number } & LoginDto): { accessToken: string } {
     if (id) this.redisService.saveLastUserConnected(id);
     const payload = { email, id };
     const options = { secret: config.authSecret };

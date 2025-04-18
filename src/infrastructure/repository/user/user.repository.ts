@@ -217,7 +217,7 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  async forgotPassword(email: ForgotPasswordDTO): Promise<unknown | null> {
+  async forgotPassword(email: ForgotPasswordDTO): Promise<User | null> {
     try {
       const data = await this.userModel.findOne({ raw: true, where: { email } });
 
@@ -264,7 +264,7 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  async resetPassword({ password, reset_password_token }: ResetPasswordDTO): Promise<unknown> {
+  async resetPassword({ password, reset_password_token }: ResetPasswordDTO): Promise<User | null> {
     try {
       const dataValues = await this.userModel.findOne({
         raw: true,
@@ -296,7 +296,7 @@ class UsersRepository implements IUserRepository {
 
       console.log(':::::::::', updateUser);
 
-      return updateUser as User;
+      return updateUser as unknown as User;
     } catch (error) {
       throw new Error(error as string | undefined);
     }

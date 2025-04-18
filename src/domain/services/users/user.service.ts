@@ -46,7 +46,7 @@ class UserService {
     return this.userRepository.remove(id);
   }
 
-  update(updateUser: UpdateUserDto): User | null {
+  update(updateUser: UpdateUserDto): Promise<User | null> {
     return this.userRepository.update(updateUser);
   }
 

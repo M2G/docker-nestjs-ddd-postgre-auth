@@ -31,8 +31,8 @@ class UserEntity {
   @IsNumber()
   last_connected_at: number;
 
-  @IsNumber()
-  reset_password_expires: number;
+  @IsString()
+  reset_password_expires: string;
 
   @IsString()
   reset_password_token: string | null;
