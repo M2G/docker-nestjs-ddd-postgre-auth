@@ -1,13 +1,6 @@
 import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
 import { RedisClient, REDIS_CLIENT } from 'src/config/redis-client.type';
-
-interface ICacheRepository {
-  get: (key: string) => Promise<string | null>;
-  set: (key: string, value: string) => void;
-  delete: (key: string) => Promise<void>;
-  setWithExpiry: (key: string, value: string, expiry: number) => void;
-  scanIterator: (key: string) => AsyncIterable<string> | null;
-}
+import { ICacheRepository } from '@domain/interfaces';
 
 @Injectable()
 export default class RedisRepository implements OnModuleDestroy, ICacheRepository {

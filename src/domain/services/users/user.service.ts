@@ -46,7 +46,7 @@ class UserService {
     return this.userRepository.remove(id);
   }
 
-  update(updateUser: UpdateUserDto): Promise<User | null> {
+  update(updateUser: UpdateUserDto): Promise<null> {
     return this.userRepository.update(updateUser);
   }
 
@@ -54,18 +54,16 @@ class UserService {
     return this.userRepository.authenticate(email);
   }
 
-  changePassword({ id, password, old_password }: User): Promise<User | null> {
-    return this.userRepository.changePassword({ id, old_password, password } as User & {
-      old_password: string;
-    });
+  changePassword(changePasswordUser: User): Promise<User | null> {
+    return this.userRepository.changePassword(changePasswordUser);
   }
 
-  forgotPassword(email: ForgotPasswordDTO): Promise<User | null> {
-    return this.userRepository.forgotPassword(email);
+  forgotPassword(forgotPasswordUser: ForgotPasswordDTO): Promise<User | null> {
+    return this.userRepository.forgotPassword(forgotPasswordUser);
   }
 
-  resetPassword({ password, reset_password_token }: ResetPasswordDTO): Promise<User | null> {
-    return this.userRepository.resetPassword({ password, reset_password_token });
+  resetPassword(resetPasswordUser: ResetPasswordDTO): Promise<null> {
+    return this.userRepository.resetPassword(resetPasswordUser);
   }
 }
 

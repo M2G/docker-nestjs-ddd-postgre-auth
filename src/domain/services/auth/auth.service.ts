@@ -9,12 +9,12 @@ class AuthService {
     @Inject(forwardRef(() => AuthRepository)) private readonly authRepository: AuthRepository,
   ) {}
 
-  validateUser(args): Promise<User | null> {
-    return this.authRepository.validateUser(args);
+  validateUser(user): Promise<User | null> {
+    return this.authRepository.validateUser(user);
   }
 
-  login(loginDto: LoginDto): { accessToken: string } {
-    return this.authRepository.login(loginDto);
+  login(loginUser: LoginDto): { accessToken: string } {
+    return this.authRepository.login(loginUser);
   }
 
   register(createUserDto: CreateUserDto): Promise<{ accessToken: string }> {

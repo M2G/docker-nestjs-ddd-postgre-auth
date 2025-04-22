@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { JwtService } from '@nestjs/jwt';
-import { UniqueConstraintError, Op } from 'sequelize';
+import { UniqueConstraintError } from 'sequelize';
 import * as bcrypt from 'bcrypt';
 import { User } from '@infrastructure/models';
 import { encryptPassword, validatePassword } from '@encryption';
@@ -77,7 +77,7 @@ class AuthRepository implements IAuthRepository {
       return this.login({
         email,
         id: user.id,
-      } as User);
+      });
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         throw new ConflictException({ message: 'Duplicate error' });

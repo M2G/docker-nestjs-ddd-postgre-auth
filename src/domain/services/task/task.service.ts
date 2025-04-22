@@ -15,7 +15,7 @@ class TaskService {
     private readonly redisService: RedisService,
   ) {}
 
-  async lastConnectedUser(): Promise<void | null> {
+  async lastConnectedUser(): Promise<null> {
     try {
       for await (const key of (await this.redisService.findLastUserConnected()) || []) {
         console.log('key', key);
@@ -28,7 +28,7 @@ class TaskService {
 
         console.log('usersInfo', usersInfo);
 
-        const [, [updatedUser]] = await this.userModel.update(
+        await this.userModel.update(
           {
             id,
             last_connected_at: lastConnectedAt,
@@ -38,17 +38,7 @@ class TaskService {
           },
         );
 
-        /*
-           const updatedUser: any = await usersRepository.update({
-             id: usersInfo?.id,
-             last_connected_at: usersInfo?.last_connected_at,
-           });
-           */
-
-        this.logger.debug(
-          '[Users.updateLastConnectedAt] users updated in database',
-          updatedUser.id,
-        );
+        this.logger.debug('[Users.updateLastConnectedAt] users updated in database', id);
       }
     } catch (error) {
       this.logger.debug('[Users.updateLastConnectedAt]', error);

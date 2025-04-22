@@ -8,7 +8,14 @@ import { UserEntity as User } from '@domain/entities';
 import { encryptPassword, validatePassword } from '@encryption';
 import { RedisService, YcI18nService, MailService } from '@domain/services';
 import { IUserRepository } from '@domain/interfaces';
-import { ForgotPasswordDTO, ResetPasswordDTO, UpdateUserDto } from '@application/dto';
+import {
+  AuthenticateDto,
+  CreateUserDto,
+  ForgotPasswordDTO,
+  ResetPasswordDTO,
+  UpdateUserDto,
+} from '@application/dto';
+import ChangePasswordDto from '@application/dto/users/change-password.dto';
 
 @Injectable()
 class UsersRepository implements IUserRepository {
@@ -143,14 +150,14 @@ class UsersRepository implements IUserRepository {
 
       const data = await this.userModel.findByPk(id, { raw: true });
       if (!data) return null;
-      this.redisService.saveUser(data as User);
-      return data;
+      this.redisService.saveUser(data as unknown as User);
+      return data as unknown as User;
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
 
-  register({ created_at, deleted_at, email, password }: User): Promise<User> {
+  register({ created_at, deleted_at, email, password }: CreateUserDto): Promise<User> {
     try {
       const hashPassword = encryptPassword(password);
       return this.userModel.create(
@@ -185,9 +192,11 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  async authenticate(email: string): Promise<User | null> {
+  async authenticate(email: AuthenticateDto): Promise<User | null> {
     try {
-      return this.userModel.findOne({ raw: true, where: { email } });
+      const dataValues = await this.userModel.findOne({ raw: true, where: { email } });
+      if (!dataValues) return null;
+      return dataValues as unknown as User;
     } catch (error) {
       throw new Error(error as string | undefined);
     }
@@ -199,7 +208,7 @@ class UsersRepository implements IUserRepository {
     old_password,
   }: {
     old_password: string;
-  } & User): Promise<unknown | null> {
+  } & ChangePasswordDto): Promise<boolean | null> {
     try {
       const dataValues = await this.userModel.findOne({ raw: true, where: { id } });
 
@@ -208,7 +217,7 @@ class UsersRepository implements IUserRepository {
         validatePassword(dataValues.dataValues.password)(old_password)
       ) {
         const hashPassword = encryptPassword(password);
-        return this.update({ id, password: hashPassword } as UpdateUserDto);
+        return this.update({ id, password: hashPassword } as never);
       }
 
       return null;
@@ -217,7 +226,7 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  async forgotPassword(email: ForgotPasswordDTO): Promise<User | null> {
+  async forgotPassword(email: ForgotPasswordDTO): Promise<boolean | null> {
     try {
       const data = await this.userModel.findOne({ raw: true, where: { email } });
 
@@ -258,13 +267,16 @@ class UsersRepository implements IUserRepository {
         id: data.id,
         reset_password_expires: new Date(Date.now() + 86400000).toISOString(),
         reset_password_token: token,
-      } as unknown as UpdateUserDto);
+      } as never);
     } catch (error) {
       throw new Error(error as string | undefined);
     }
   }
 
-  async resetPassword({ password, reset_password_token }: ResetPasswordDTO): Promise<User | null> {
+  async resetPassword({
+    password,
+    reset_password_token,
+  }: ResetPasswordDTO): Promise<boolean | null> {
     try {
       const dataValues = await this.userModel.findOne({
         raw: true,
@@ -288,15 +300,12 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  async update({ id, ...params }: UpdateUserDto): Promise<User | null> {
+  async update({ id, ...params }: UpdateUserDto): Promise<boolean> {
     try {
-      const [, [updateUser]] = await this.userModel.update({ ...params }, {
+      const [ok] = await this.userModel.update({ ...params }, {
         where: { id },
-      } as any);
-
-      console.log(':::::::::', updateUser);
-
-      return updateUser as unknown as User;
+      } as never);
+      return !!ok;
     } catch (error) {
       throw new Error(error as string | undefined);
     }

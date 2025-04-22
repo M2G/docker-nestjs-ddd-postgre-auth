@@ -5,7 +5,7 @@ class LoginDto {
   password?: string;
 
   @IsString()
-  username: string;
+  email: string;
 }
 
 export default LoginDto;
