@@ -4,6 +4,8 @@ import {
   UpdateUserDto,
   ResetPasswordDTO,
   ForgotPasswordDTO,
+  ChangePasswordDTO,
+  AuthenticateDto,
 } from '@application/dto';
 import { UsersRepository } from '@infrastructure/repository';
 import { UserEntity as User } from '@domain/entities';
@@ -46,19 +48,23 @@ class UserService {
     return this.userRepository.remove(id);
   }
 
-  update(updateUser: UpdateUserDto): Promise<null> {
+  update(updateUser: UpdateUserDto): Promise<boolean> {
     return this.userRepository.update(updateUser);
   }
 
-  authenticate(email: string): Promise<User | null> {
+  authenticate(email: AuthenticateDto): Promise<User | null> {
     return this.userRepository.authenticate(email);
   }
 
-  changePassword(changePasswordUser: User): Promise<User | null> {
+  changePassword(
+    changePasswordUser: {
+      old_password: string;
+    } & ChangePasswordDTO,
+  ): Promise<boolean | null> {
     return this.userRepository.changePassword(changePasswordUser);
   }
 
-  forgotPassword(forgotPasswordUser: ForgotPasswordDTO): Promise<User | null> {
+  forgotPassword(forgotPasswordUser: ForgotPasswordDTO): Promise<boolean | null> {
     return this.userRepository.forgotPassword(forgotPasswordUser);
   }
 

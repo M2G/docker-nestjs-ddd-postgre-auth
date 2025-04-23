@@ -259,7 +259,7 @@ class UsersRepository implements IUserRepository {
         to: 'joanna@gmail.com',
       };
 
-      const mailOption = await this.mailService.send(mail);
+      const mailOption: any = await this.mailService.send(mail);
 
       this.logger.log(mailOption.messageId);
 
