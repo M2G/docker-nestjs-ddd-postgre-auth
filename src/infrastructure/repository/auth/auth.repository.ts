@@ -35,7 +35,7 @@ class AuthRepository implements IAuthRepository {
     return { accessToken: this.jwtService.sign(payload, options) };
   }
 
-  async validateUser({ email, password }: User): Promise<User | null> {
+  async validateUser({ email, password }: LoginDto): Promise<User | null | any> {
     try {
       const user = await this.userModel.findOne({ raw: true, where: { email } });
       /*
@@ -77,7 +77,7 @@ class AuthRepository implements IAuthRepository {
       return this.login({
         email,
         id: user.id,
-      });
+      } as { id: number } & LoginDto);
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         throw new ConflictException({ message: 'Duplicate error' });

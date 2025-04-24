@@ -13,7 +13,7 @@ class AuthService {
     return this.authRepository.validateUser(user);
   }
 
-  login(loginUser: LoginDto): { accessToken: string } {
+  login(loginUser: { id: number } & LoginDto): { accessToken: string } {
     return this.authRepository.login(loginUser);
   }
 

@@ -68,7 +68,7 @@ class UserService {
     return this.userRepository.forgotPassword(forgotPasswordUser);
   }
 
-  resetPassword(resetPasswordUser: ResetPasswordDTO): Promise<null> {
+  resetPassword(resetPasswordUser: ResetPasswordDTO): Promise<boolean | null> {
     return this.userRepository.resetPassword(resetPasswordUser);
   }
 }

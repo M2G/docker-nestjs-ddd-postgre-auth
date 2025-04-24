@@ -53,7 +53,7 @@ class UsersController {
   update(
     @Param('id') id: string,
     @Body(new ValidationPipe()) updateUser: UpdateUserDto,
-  ): User | null {
+  ): Promise<boolean> {
     return this.usersService.update({ ...updateUser, id: Number(id) });
   }
 
