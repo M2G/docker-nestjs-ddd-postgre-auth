@@ -38,6 +38,8 @@ class TaskService {
           },
         );
 
+        console.log('ok', ok);
+
         this.logger.debug('[Users.updateLastConnectedAt] users updated in database', id);
 
         return !!ok;

@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ValidationPipe,
@@ -11,6 +10,7 @@ import {
   UseGuards,
   HttpStatus,
   HttpCode,
+  Put,
 } from '@nestjs/common';
 import UserService from '@domain/services/users';
 import { UserEntity as User } from '@domain/entities';
@@ -18,8 +18,8 @@ import { JwtAuthGuard } from '@application/auth/guards';
 import { ForgotPasswordDTO, ResetPasswordDTO, UpdateUserDto } from '@application/dto';
 import CreateUserDto from '@application/dto/users/create-user.dto';
 
+// @UseGuards(JwtAuthGuard)
 @Controller('users')
-@UseGuards(JwtAuthGuard)
 class UsersController {
   constructor(
     private readonly usersService: UserService,
@@ -49,7 +49,7 @@ class UsersController {
     return user as unknown as User;
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id') id: string,
     @Body(new ValidationPipe()) updateUser: UpdateUserDto,
@@ -58,9 +58,9 @@ class UsersController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  // @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<boolean> {
-    const user = await this.usersService.remove(Number(id));
+    const removeUser = await this.usersService.remove(Number(id));
     /* if (!user) {
    throw new NotFoundException(
      this.i18n.t('users.notFound', {
@@ -68,11 +68,13 @@ class UsersController {
      }) as string,
    );
  } */
-    return !!user;
+    console.log(!!removeUser);
+    return !!removeUser;
   }
 
   @Post('register')
   create(@Body(new ValidationPipe()) createUser: CreateUserDto) {
+    console.log('create create create', createUser);
     return this.usersService.register(createUser);
   }
 

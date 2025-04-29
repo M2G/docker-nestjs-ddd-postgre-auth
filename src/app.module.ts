@@ -4,7 +4,7 @@ import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } fro
 import * as path from 'path';
 import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import LoggerMiddleware from '@application/middleware';
 import { YcI18nModule } from './yc-i18n/yc-i18n.module';
 import UsersModule from './user.module';
@@ -22,10 +22,15 @@ import TestModule from './test.module';
       envFilePath: ['.env', '.env.example'],
       isGlobal: true,
     }),
-    JwtModule.register({
-      global: true,
-      secret: 'secret',
-      signOptions: { expiresIn: '60s' },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET') || 'secret',
+        signOptions: {
+          expiresIn: '60s',
+        },
+      }),
+      inject: [ConfigService],
     }),
     SequelizeModule.forRoot({
       autoLoadModels: true,

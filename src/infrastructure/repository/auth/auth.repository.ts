@@ -31,7 +31,7 @@ class AuthRepository implements IAuthRepository {
   login({ id, email }: { id: number } & LoginDto): { accessToken: string } {
     if (id) this.redisService.saveLastUserConnected(id);
     const payload = { email, id };
-    const options = { secret: config.authSecret };
+    const options = { expiresIn: '120s', secret: config.authSecret };
     return { accessToken: this.jwtService.sign(payload, options) };
   }
 
@@ -57,19 +57,13 @@ class AuthRepository implements IAuthRepository {
     }
   }
 
-  async register({
-    created_at,
-    modified_at,
-    email,
-    password,
-  }: CreateUserDto): Promise<{ accessToken: string }> {
+  async register({ email, password }: CreateUserDto): Promise<{ accessToken: string }> {
     try {
-      const hashPassword = encryptPassword(password);
+      const hashPassword = encryptPassword(password as string);
       const user = await this.userModel.create(
         {
-          created_at,
+          created_at: new Date(Date.now()).toISOString(),
           email,
-          modified_at,
           password: hashPassword,
         },
         { raw: true },

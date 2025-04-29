@@ -72,6 +72,7 @@ module.exports = {
     'no-void': 1,
     'nonblock-statement-body-position': 1,
 
+    '@typescript-eslint/non-nullable-type-assertion-style': 1,
     '@typescript-eslint/no-unused-expressions': 1,
     '@typescript-eslint/class-methods-use-this': 1,
     '@typescript-eslint/max-params': 1,

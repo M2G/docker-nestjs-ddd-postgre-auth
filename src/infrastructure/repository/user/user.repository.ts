@@ -157,13 +157,15 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  register({ created_at, deleted_at, email, password }: CreateUserDto): Promise<User> {
+  register({ email, password }: CreateUserDto): Promise<User> {
     try {
-      const hashPassword = encryptPassword(password);
+      const hashPassword = encryptPassword(password as string);
+
+      console.log('fffff', { email, password });
+
       return this.userModel.create(
         {
-          created_at,
-          deleted_at,
+          created_at: new Date(Date.now()).toISOString(),
           email,
           password: hashPassword,
         },
