@@ -11,25 +11,41 @@ import {
   HttpStatus,
   HttpCode,
   Put,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
-import UserService from '@domain/services/users';
+import { I18nService } from 'nestjs-i18n';
+import { UserService } from '@domain/services';
 import { UserEntity as User } from '@domain/entities';
 import { JwtAuthGuard } from '@application/auth/guards';
-import { ForgotPasswordDTO, ResetPasswordDTO, UpdateUserDto } from '@application/dto';
-import CreateUserDto from '@application/dto/users/create-user.dto';
+import {
+  ForgotPasswordDTO,
+  ResetPasswordDTO,
+  UpdateUserDto,
+  ChangePasswordDTO,
+  CreateUserDto,
+} from '@application/dto';
+import { UserTypeResultData } from '@domain/interfaces';
 
-// @UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 @Controller('users')
 class UsersController {
   constructor(
     private readonly usersService: UserService,
-    // private readonly i18n: YcI18nService,
+    private readonly i18n: I18nService,
   ) {}
 
   @Get()
-  findAll(@Request() { query: { attributes, filters, page, pageSize } }): Promise<User[] | null> {
+  findAll(@Request() { query: { filters, page, pageSize } }): Promise<{
+    pageInfo: {
+      count: number;
+      next: number | null;
+      pages: number;
+      prev: number | null;
+    };
+    results: UserTypeResultData[];
+  }> {
     return this.usersService.find({
-      attributes,
       filters,
       page,
       pageSize,
@@ -39,13 +55,15 @@ class UsersController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const user = await this.usersService.findOne(Number(id));
-    /* if (!user) {
+    /*
+    if (!user) {
       throw new NotFoundException(
         this.i18n.t('users.notFound', {
           args: { id },
         }),
       );
-    } */
+    }
+    */
     return user as unknown as User;
   }
 
@@ -61,13 +79,15 @@ class UsersController {
   // @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<boolean> {
     const removeUser = await this.usersService.remove(Number(id));
-    /* if (!user) {
+    /*
+   if (!removeUser) {
    throw new NotFoundException(
      this.i18n.t('users.notFound', {
        args: { id },
      }) as string,
    );
- } */
+ }
+ */
     console.log(!!removeUser);
     return !!removeUser;
   }
@@ -92,6 +112,18 @@ class UsersController {
       password,
       reset_password_token: token,
     } as ResetPasswordDTO);
+  }
+
+  @Post('change-password')
+  async changePassword(
+    @Body(new ValidationPipe()) { password, old_password }: ChangePasswordDTO,
+    //  @Request() { user: { id } },
+  ) {
+    const changedPassword = await this.usersService.changePassword({
+      id: 13,
+      old_password,
+      password,
+    });
   }
 }
 
