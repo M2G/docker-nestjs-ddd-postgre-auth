@@ -16,9 +16,6 @@ class UserEntity {
   @IsString()
   password: string;
 
-  @IsString()
-  old_password: string | null;
-
   @IsDate()
   created_at: Date;
 
