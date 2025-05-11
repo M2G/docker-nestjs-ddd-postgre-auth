@@ -9,27 +9,33 @@ import {
 } from '@application/dto';
 import { UsersRepository } from '@infrastructure/repository';
 import { UserEntity as User } from '@domain/entities';
+import { UserTypeResultData } from '@domain/interfaces';
 
 @Injectable()
 class UserService {
   constructor(
-    // @Inject(forwardRef(() => UsersRepository)) private readonly userRepository: UsersRepository,
-    private readonly userRepository: UsersRepository,
+    @Inject(forwardRef(() => UsersRepository)) private readonly userRepository: UsersRepository,
+    // private readonly userRepository: UsersRepository,
   ) {}
 
   find({
-    attributes,
     filters,
     page,
     pageSize,
   }: {
-    attributes: string[] | undefined;
     filters: string;
     page: number;
     pageSize: number;
-  }): Promise<User[]> {
+  }): Promise<{
+    pageInfo: {
+      count: number;
+      next: number | null;
+      pages: number;
+      prev: number | null;
+    },
+    results: UserTypeResultData [];
+  }> {
     return this.userRepository.find({
-      attributes,
       filters,
       page,
       pageSize,
@@ -48,7 +54,7 @@ class UserService {
     return this.userRepository.remove(id);
   }
 
-  update(updateUser: UpdateUserDto): Promise<boolean> {
+  update(updateUser: { id: number } & UpdateUserDto): Promise<boolean> {
     return this.userRepository.update(updateUser);
   }
 
@@ -58,7 +64,7 @@ class UserService {
 
   changePassword(
     changePasswordUser: {
-      old_password: string;
+      id: number;
     } & ChangePasswordDTO,
   ): Promise<boolean | null> {
     return this.userRepository.changePassword(changePasswordUser);
