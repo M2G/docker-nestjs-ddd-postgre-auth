@@ -1,6 +1,11 @@
-import { PartialType, OmitType } from '@nestjs/mapped-types';
-import CreateUserDto from './update-user.dto';
+import { IsString } from 'class-validator';
 
-export default class CreateUserEntity extends PartialType(
-  OmitType(CreateUserDto, ['id'] as const),
-) {}
+class CreateUserEntity {
+  @IsString()
+  email: string;
+
+  @IsString()
+  password: string;
+}
+
+export default CreateUserEntity;
