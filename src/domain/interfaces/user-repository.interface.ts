@@ -1,5 +1,7 @@
+import { PartialType, OmitType } from '@nestjs/mapped-types';
 import type { UserEntity as User } from '@domain/entities';
-import {
+import { UserEntity as UserType } from '@domain/entities';
+import type {
   ForgotPasswordDTO,
   CreateUserDto,
   UpdateUserDto,
@@ -8,19 +10,36 @@ import {
   AuthenticateDto,
 } from '@application/dto';
 
+export class UserTypeResultData extends PartialType(
+  OmitType(UserType, [
+    'id',
+    'email',
+    'first_name',
+    'last_name',
+    'created_at',
+    'modified_at',
+  ] as const),
+) {}
+
 interface IUserRepository {
   authenticate: (email: AuthenticateDto) => Promise<User | null>;
   find: ({
     filters,
     pageSize,
     page,
-    attributes,
   }: {
     filters: string;
     pageSize: number;
     page: number;
-    attributes: string[] | undefined;
-  }) => Promise<User[]>;
+  }) => Promise<{
+    pageInfo: {
+      count: number;
+      next: number | null;
+      pages: number;
+      prev: number | null;
+    };
+    results: UserTypeResultData[];
+  }>;
   findOne: (id: number) => Promise<User | null>;
   forgotPassword: (email: ForgotPasswordDTO) => Promise<boolean | null>;
   register: (createUser: CreateUserDto) => Promise<User>;
@@ -30,7 +49,7 @@ interface IUserRepository {
     password,
     old_password,
   }: {
-    old_password: string;
+    id: number;
   } & ChangePasswordDTO) => Promise<boolean | null>;
   update: (updateUser: UpdateUserDto) => Promise<boolean>;
   remove: (id: number) => Promise<boolean>;
