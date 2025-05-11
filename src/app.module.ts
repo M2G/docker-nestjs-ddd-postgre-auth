@@ -2,11 +2,11 @@ import { Module, NestModule, MiddlewareConsumer, forwardRef } from '@nestjs/comm
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import * as path from 'path';
+import { join } from 'path';
 import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import LoggerMiddleware from '@application/middleware';
-import { YcI18nModule } from './yc-i18n/yc-i18n.module';
 import UsersModule from './user.module';
 import RedisModule from './redis.module';
 import AuthModule from './auth.module';
@@ -42,24 +42,23 @@ import TestModule from './test.module';
       synchronize: true,
       username: 'postgres',
     }),
-    I18nModule.forRoot({
-      fallbackLanguage: 'en',
-      loaderOptions: {
-        // path: path.resolve(__dirname, '../../src/locales/'),
-        path: path.join(__dirname, '../../src/locales/'),
-        watch: true,
-      },
+    I18nModule.forRootAsync({
+      useFactory: () => ({
+        fallbackLanguage: 'en',
+        loaderOptions: {
+          path: path.join(__dirname, '../../src/locales/'),
+          watch: true,
+        },
+        typesOutputPath: join(__dirname, '../src/generated/i18n.generated.ts'),
+      }),
       resolvers: [
         new QueryResolver(['lang']),
         AcceptLanguageResolver,
         new HeaderResolver(['x-lang']),
       ],
-      // typesOutputPath: path.join(__dirname, '../src/generated/i18n.generated.ts'),
     }),
-
     MailModule,
     RedisModule,
-    YcI18nModule,
     UsersModule,
     TaskModule,
     AuthModule,

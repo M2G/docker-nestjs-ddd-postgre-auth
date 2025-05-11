@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS users (
   first_name VARCHAR(255),
   last_name VARCHAR(255),
   password VARCHAR(255) NOT NULL,
-  old_password VARCHAR(255),
   created_at timestamp without time zone NOT NULL DEFAULT statement_timestamp(),
   modified_at timestamp without time zone NOT NULL DEFAULT statement_timestamp(),
   reset_password_token TEXT,
