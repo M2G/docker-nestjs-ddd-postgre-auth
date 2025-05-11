@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { JwtService } from '@nestjs/jwt';
 import { UniqueConstraintError, Op } from 'sequelize';
@@ -6,8 +6,8 @@ import { ConfigService } from '@nestjs/config';
 import { User as UserModel } from '@infrastructure/models';
 import { UserEntity as User } from '@domain/entities';
 import { encryptPassword, validatePassword } from '@encryption';
-import { RedisService, YcI18nService, MailService } from '@domain/services';
-import { IUserRepository } from '@domain/interfaces';
+import { RedisService, MailService } from '@domain/services';
+import { IUserRepository, UserTypeResultData } from '@domain/interfaces';
 import {
   AuthenticateDto,
   CreateUserDto,
@@ -16,6 +16,7 @@ import {
   UpdateUserDto,
 } from '@application/dto';
 import ChangePasswordDto from '@application/dto/users/change-password.dto';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 
 @Injectable()
 class UsersRepository implements IUserRepository {
@@ -25,23 +26,31 @@ class UsersRepository implements IUserRepository {
     @InjectModel(UserModel)
     private readonly userModel: typeof UserModel,
     private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => RedisService))
     private readonly redisService: RedisService,
-    private readonly i18n: YcI18nService,
     private readonly configService: ConfigService,
+    @Inject(forwardRef(() => MailService))
     private readonly mailService: MailService,
+    private readonly i18n: I18nService
   ) {}
 
   async find({
     filters,
     pageSize,
     page,
-    attributes,
   }: {
     filters: string;
     pageSize: number;
     page: number;
-    attributes: string[] | undefined;
-  }): Promise<User[]> {
+  }): Promise<{
+    pageInfo: {
+      count: number;
+      next: number | null;
+      pages: number;
+      prev: number | null;
+    },
+    results: UserTypeResultData[];
+  }> {
     try {
       const query: {
         where: {
@@ -94,11 +103,10 @@ class UsersRepository implements IUserRepository {
       }
 
       console.log('query query query', query);
-      console.log('attributes attributes attributes', attributes);
 
       if (!filters) {
-        const cachingUserList = await this.redisService.findUsers();
-        console.log('cachingUserList cachingUserList cachingUserList', cachingUserList);
+       const cachingUserList = await this.redisService.findUsers();
+       console.log('cachingUserList cachingUserList cachingUserList', cachingUserList);
         if (cachingUserList) {
           return {
             pageInfo: {
@@ -108,7 +116,7 @@ class UsersRepository implements IUserRepository {
               prev: null,
             },
             results: JSON.parse(cachingUserList),
-          } as any;
+          };
         }
       }
 
@@ -116,14 +124,14 @@ class UsersRepository implements IUserRepository {
 
       const data = await this.userModel.findAll({
         ...query,
-        attributes,
+        attributes: ['id', 'email', 'first_name', 'last_name', 'created_at', 'modified_at'],
         limit: pageSize,
         nest: true,
         offset: pageSize * (currPage - 1),
         raw: true,
       });
 
-      data?.length && this.redisService.saveUsers(data as User[]);
+     data?.length && this.redisService.saveUsers(data as User[]);
 
       const pages = Math.ceil(data.length / pageSize);
       const prev = currPage > 1 ? currPage - 1 : null;
@@ -137,29 +145,29 @@ class UsersRepository implements IUserRepository {
           prev,
         },
         results: data?.length ? data : [],
-      } as any;
+      };
     } catch (error) {
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 
   async findOne(id: number): Promise<User | null> {
     try {
-      const cachingUser = await this.redisService.findUser(String(id));
-      if (cachingUser) return cachingUser as unknown as User;
+    const cachingUser = await this.redisService.findUser(String(id));
+    if (cachingUser) return cachingUser as unknown as User;
 
       const data = await this.userModel.findByPk(id, { raw: true });
       if (!data) return null;
-      this.redisService.saveUser(data as unknown as User);
+     this.redisService.saveUser(data as unknown as User);
       return data as unknown as User;
     } catch (error) {
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 
-  register({ email, password }: CreateUserDto): Promise<User> {
+  async register({ email, password }: CreateUserDto): Promise<User> {
     try {
-      const hashPassword = encryptPassword(password as string);
+      const hashPassword = encryptPassword(password);
 
       console.log('fffff', { email, password });
 
@@ -176,21 +184,21 @@ class UsersRepository implements IUserRepository {
         throw new Error(
           this.i18n.t('users.duplicateEmail', {
             args: { email },
-          }) as string,
+          }),
         );
       }
 
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 
   async remove(id: number): Promise<boolean> {
     try {
       const ok = await this.userModel.destroy({ where: { id } });
-      void this.redisService.removeUser(id);
+     void this.redisService.removeUser(id);
       return !!ok;
     } catch (error) {
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 
@@ -200,7 +208,7 @@ class UsersRepository implements IUserRepository {
       if (!dataValues) return null;
       return dataValues as unknown as User;
     } catch (error) {
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 
@@ -209,22 +217,26 @@ class UsersRepository implements IUserRepository {
     password,
     old_password,
   }: {
-    old_password: string;
+    id: number;
   } & ChangePasswordDto): Promise<boolean | null> {
-    try {
-      const dataValues = await this.userModel.findOne({ raw: true, where: { id } });
 
-      if (
-        dataValues?.dataValues?.password &&
-        validatePassword(dataValues.dataValues.password)(old_password)
-      ) {
+    console.log("changePassword", {
+      id,
+      password,
+      old_password,
+    });
+
+    try {
+      const user = await this.userModel.findOne({ raw: true, where: { id } });
+
+      if (user?.password && !validatePassword(user.password)(old_password))
+        throw new BadRequestException(this.i18n.t('users.passwordNotMatch'));
+
         const hashPassword = encryptPassword(password);
         return this.update({ id, password: hashPassword } as never);
-      }
 
-      return null;
     } catch (error) {
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 
@@ -243,16 +255,14 @@ class UsersRepository implements IUserRepository {
       };
       const options = {
         audience: [],
-        expiresIn: this.configService.get<string>('JWT_TOKEN_EXPIRE_TIME'),
-        secret: this.configService.get<string>('SECRET'),
+       expiresIn: this.configService.get<string>('JWT_TOKEN_EXPIRE_TIME'),
+       secret: this.configService.get<string>('SECRET'),
         subject: data.email,
       };
 
-      console.log('this.jwtService', this.jwtService);
+     const token = await this.jwtService.signAsync(payload, options);
 
-      const token = await this.jwtService.signAsync(payload, options);
-
-      console.log('token', token);
+     console.log('token', token);
 
       const mail = {
         from: 'Kingsley Okure',
@@ -271,7 +281,7 @@ class UsersRepository implements IUserRepository {
         reset_password_token: token,
       } as never);
     } catch (error) {
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 
@@ -296,20 +306,20 @@ class UsersRepository implements IUserRepository {
       dataValues.reset_password_token = null;
       dataValues.reset_password_expires = new Date(Date.now()).toISOString();
 
-      return this.update(dataValues as unknown as UpdateUserDto);
+      return this.update(dataValues as unknown as { id: number } & UpdateUserDto);
     } catch (error) {
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 
-  async update({ id, ...params }: UpdateUserDto): Promise<boolean> {
+  async update({ id, ...params }: { id: number } & UpdateUserDto): Promise<boolean> {
     try {
       const [ok] = await this.userModel.update({ ...params }, {
         where: { id },
       } as never);
       return !!ok;
     } catch (error) {
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 }

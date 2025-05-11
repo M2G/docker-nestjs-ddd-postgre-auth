@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UniqueConstraintError } from 'sequelize';
 import { User as UserModel, Token as TokenModel } from '@infrastructure/models';
 import { TokenEntity as Token, UserEntity as User } from '@domain/entities';
-import { UserService, YcI18nService } from '@domain/services';
+import { UserService } from '@domain/services';
 import { CreateUserDto } from '@application/dto/users';
 import config from '@config';
 
@@ -24,7 +24,7 @@ class TokenRepository implements ITokenRepository {
     private readonly userModel: typeof UserModel,
     // private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    private readonly i18n: YcI18nService,
+    // private readonly i18n: YcI18nService,
   ) {}
 
   private verifyExpiration({ expiryDate }: { expiryDate: number }): boolean {
@@ -44,7 +44,7 @@ class TokenRepository implements ITokenRepository {
       if (this.verifyExpiration(refreshToken as unknown as Token)) {
         // await this.userService.remove({ id: refreshToken?.id } as any);
         await this.userModel.destroy({ where: { id: refreshToken?.id } });
-        throw new Error(this.i18n.t('errors.refreshToken') as string);
+      //  throw new Error(this.i18n.t('errors.refreshToken') as string);
       }
 
       const user = await this.tokenModel.findOne({ where: { id: refreshToken?.id } });

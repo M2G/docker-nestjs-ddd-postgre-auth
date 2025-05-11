@@ -11,7 +11,7 @@ import { UniqueConstraintError } from 'sequelize';
 import * as bcrypt from 'bcrypt';
 import { User } from '@infrastructure/models';
 import { encryptPassword, validatePassword } from '@encryption';
-import { RedisService, YcI18nService } from '@domain/services';
+import { RedisService } from '@domain/services';
 import { IAuthRepository } from '@domain/interfaces';
 import config from '@config';
 import { CreateUserDto, LoginDto } from '@application/dto';
