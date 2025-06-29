@@ -2,7 +2,7 @@
 # Docker NodeJS Typescript Starter
 # Example Dockerfile
 #
-FROM node:20.6.0-alpine3.17 AS build
+FROM node:24.2.0-alpine3.21 AS build
 
 ## Install build toolchain, install node deps and compile native add-ons
 ## https://stackoverflow.com/questions/70852805/bcrypt-error-in-docker-container-error-path-to-local-module-node-modules-bcry
@@ -25,7 +25,7 @@ RUN cp .env.example .env
 # Install dependencies
 RUN npm install
 
-FROM node:20.6.0-alpine3.17 as app
+FROM node:24.2.0-alpine3.21 as app
 
 ## Copy built node modules and binaries without including the toolchain
 COPY --from=build /app .

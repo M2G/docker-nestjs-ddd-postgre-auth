@@ -165,13 +165,11 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  async register({ email, password }: CreateUserDto): Promise<User> {
+  async register({ email, password }: CreateUserDto): Promise<boolean> {
     try {
       const hashPassword = encryptPassword(password);
 
-      console.log('fffff', { email, password });
-
-      return this.userModel.create(
+      const user = await this.userModel.create(
         {
           created_at: new Date(Date.now()).toISOString(),
           email,
@@ -179,6 +177,9 @@ class UsersRepository implements IUserRepository {
         },
         { raw: true },
       ) as any;
+
+      return !!user;
+
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         throw new Error(

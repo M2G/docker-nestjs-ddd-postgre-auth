@@ -42,7 +42,7 @@ interface IUserRepository {
   }>;
   findOne: (id: number) => Promise<User | null>;
   forgotPassword: (email: ForgotPasswordDTO) => Promise<boolean | null>;
-  register: (createUser: CreateUserDto) => Promise<User>;
+  register: (createUser: CreateUserDto) => Promise<boolean>;
   resetPassword: ({ password, reset_password_token }: ResetPasswordDTO) => Promise<boolean | null>;
   changePassword: ({
     id,

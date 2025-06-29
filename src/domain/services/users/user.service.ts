@@ -46,7 +46,7 @@ class UserService {
     return this.userRepository.findOne(id);
   }
 
-  register(createUser: CreateUserDto): Promise<User> {
+  register(createUser: CreateUserDto): Promise<boolean> {
     return this.userRepository.register(createUser);
   }
 

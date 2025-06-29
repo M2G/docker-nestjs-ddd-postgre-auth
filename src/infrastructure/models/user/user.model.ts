@@ -18,9 +18,6 @@ class User extends Model {
   password: string;
 
   @Column
-  old_password: string;
-
-  @Column
   created_at: Date;
 
   @Column
