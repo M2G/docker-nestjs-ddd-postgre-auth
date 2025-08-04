@@ -53,7 +53,7 @@ class AuthRepository implements IAuthRepository {
       }
       return user;
     } catch (error) {
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 
@@ -76,7 +76,7 @@ class AuthRepository implements IAuthRepository {
       if (error instanceof UniqueConstraintError) {
         throw new ConflictException({ message: 'Duplicate error' });
       }
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 }

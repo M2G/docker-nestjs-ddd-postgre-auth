@@ -66,7 +66,7 @@ class TokenRepository implements ITokenRepository {
         refreshToken: refreshToken?.token,
       };
     } catch (error) {
-      throw new Error(error as string | undefined);
+      throw error;
     }
   }
 }
