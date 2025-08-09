@@ -10,15 +10,15 @@ import AppModule from './app.module';
 
 
 const CorsOptions: FastifyCorsOptions = {
+  allowedHeaders: "Content-Type, Authorization",
+  credentials: true,
+  maxAge: 86400,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   origin: [
     // ? Development environment
     "http://localhost:3002",
     // * Add Production and Staging URLs here
   ],
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: "Content-Type, Authorization",
-  credentials: true,
-  maxAge: 86400,
 };
 
 async function bootstrap(): Promise<void> {
