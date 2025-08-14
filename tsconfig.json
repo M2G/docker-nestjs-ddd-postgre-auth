@@ -15,6 +15,7 @@
     "skipLibCheck": true,
     "paths": {
       "@config": ["config"],
+      "@config2": ["src/config2"],
       "@constants": ["src/constants"],
       "@domain/*": ["src/domain/*"],
       "@application/*": ["src/application/*"],
