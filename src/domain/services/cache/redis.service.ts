@@ -1,7 +1,8 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
-import { RedisRepository } from '@infrastructure/repository';
+// import { RedisRepository } from '@infrastructure/repository';
 import RedisPrefixEnum from '@domain/enum';
 import { UserEntity as User } from '@domain/entities';
+import RedisRepository from '@infrastructure/repository/cache/redis.repository';
 
 @Injectable()
 class RedisService {

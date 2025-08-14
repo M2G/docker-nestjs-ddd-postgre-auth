@@ -11,9 +11,10 @@ import { UniqueConstraintError } from 'sequelize';
 import * as bcrypt from 'bcrypt';
 import { User } from '@infrastructure/models';
 import { encryptPassword, validatePassword } from '@encryption';
-import { RedisService } from '@domain/services';
+// import { RedisService } from '@domain/services';
+import RedisService from '@domain/services/cache/redis.service';
 import { IAuthRepository } from '@domain/interfaces';
-import config from '@config';
+import config from '@config2';
 import { CreateUserDto, LoginDto } from '@application/dto';
 
 @Injectable()

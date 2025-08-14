@@ -6,7 +6,7 @@ import { User as UserModel, Token as TokenModel } from '@infrastructure/models';
 import { TokenEntity as Token, UserEntity as User } from '@domain/entities';
 import { UserService } from '@domain/services';
 import { CreateUserDto } from '@application/dto/users';
-import config from '@config';
+import config from '@config2';
 
 export interface ITokenRepository {
   // register: (createUserDto: CreateUserDto) => Promise<User | null>;

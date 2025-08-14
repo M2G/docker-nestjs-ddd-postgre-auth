@@ -8,6 +8,21 @@ export type I18nTranslations = {
     "common": {
         "about": string;
     };
+    "token": {
+        "errors": {
+            "invalid": string;
+            "expired": string;
+            "refreshToken": string;
+        };
+    };
+    "users": {
+        "deleteSuccess": string;
+        "idNotFound": string;
+        "emailNotFound": string;
+        "passwordNotMatch": string;
+        "duplicateEmail": string;
+        "notFound": string;
+    };
     "validation": {
         "required": string;
         "length": string;

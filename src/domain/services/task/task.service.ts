@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { RedisService } from '@domain/services';
+// import { RedisService } from '@domain/services';
+import RedisService from '@domain/services/cache/redis.service';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from '@infrastructure/models';
 

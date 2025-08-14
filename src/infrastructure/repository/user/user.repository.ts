@@ -6,8 +6,10 @@ import { ConfigService } from '@nestjs/config';
 import { User as UserModel } from '@infrastructure/models';
 import { UserEntity as User } from '@domain/entities';
 import { encryptPassword, validatePassword } from '@encryption';
-import { RedisService, MailService } from '@domain/services';
+//import { RedisService, MailService } from '@domain/services';
 import { IUserRepository, UserTypeResultData } from '@domain/interfaces';
+import RedisService from '@domain/services/cache/redis.service';
+import MailService from '@domain/services/mail/mail.service';
 import {
   AuthenticateDto,
   CreateUserDto,

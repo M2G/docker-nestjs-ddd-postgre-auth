@@ -8,7 +8,6 @@ import type { CorsOptions } from "@nestjs/common/interfaces/external/cors-option
 import type { FastifyCorsOptions } from '@fastify/cors';
 import AppModule from './app.module';
 
-
 const CorsOptions: FastifyCorsOptions = {
   allowedHeaders: "Content-Type, Authorization",
   credentials: true,
