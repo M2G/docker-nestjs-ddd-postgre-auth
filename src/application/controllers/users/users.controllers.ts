@@ -27,7 +27,7 @@ import {
 } from '@application/dto';
 import { UserTypeResultData } from '@domain/interfaces';
 
-//@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 class UsersController {
   constructor(
@@ -55,7 +55,7 @@ class UsersController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const user = await this.usersService.findOne(Number(id));
-    /*
+
     if (!user) {
       throw new NotFoundException(
         this.i18n.t('users.notFound', {
@@ -63,7 +63,6 @@ class UsersController {
         }),
       );
     }
-    */
     return user as unknown as User;
   }
 
@@ -79,15 +78,15 @@ class UsersController {
   // @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<boolean> {
     const removeUser = await this.usersService.remove(Number(id));
-    /*
-   if (!removeUser) {
-   throw new NotFoundException(
-     this.i18n.t('users.notFound', {
-       args: { id },
-     }) as string,
-   );
- }
- */
+
+    if (!removeUser) {
+      throw new NotFoundException(
+        this.i18n.t('users.notFound', {
+          args: { id },
+        }) as string,
+      );
+    }
+
     console.log(!!removeUser);
     return !!removeUser;
   }
