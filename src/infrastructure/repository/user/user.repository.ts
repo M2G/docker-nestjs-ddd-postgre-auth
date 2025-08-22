@@ -7,6 +7,7 @@ import { User as UserModel } from '@infrastructure/models';
 import { UserEntity as User } from '@domain/entities';
 import { encryptPassword, validatePassword } from '@encryption';
 //import { RedisService, MailService } from '@domain/services';
+//import { RedisService } from '@domain/services';
 import { IUserRepository, UserTypeResultData } from '@domain/interfaces';
 import RedisService from '@domain/services/cache/redis.service';
 import MailService from '@domain/services/mail/mail.service';
@@ -243,11 +244,10 @@ class UsersRepository implements IUserRepository {
     }
   }
 
-  async forgotPassword(email: ForgotPasswordDTO): Promise<boolean | null> {
+  async forgotPassword({ email }: ForgotPasswordDTO): Promise<boolean | null> {
+    console.log('data', email);
     try {
       const data = await this.userModel.findOne({ raw: true, where: { email } });
-
-      console.log('data', data);
 
       if (!data) return null;
 

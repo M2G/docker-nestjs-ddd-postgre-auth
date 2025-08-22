@@ -3,7 +3,7 @@ import { RedisClient, REDIS_CLIENT } from 'src/config/redis-client.type';
 import { ICacheRepository } from '@domain/interfaces';
 
 @Injectable()
-export default class RedisRepository implements OnModuleDestroy, ICacheRepository {
+class RedisRepository implements OnModuleDestroy, ICacheRepository {
   public constructor(@Inject(REDIS_CLIENT) private readonly redis: RedisClient) {}
 
   /**
@@ -36,3 +36,5 @@ export default class RedisRepository implements OnModuleDestroy, ICacheRepositor
     await this.redis.set(key, value, { EX: expiry });
   }
 }
+
+export default RedisRepository;
