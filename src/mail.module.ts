@@ -5,15 +5,19 @@ import MailRepository from '@infrastructure/repository/mail/mail.repository';
 import { MailerModule } from '@nestjs-modules/mailer';
 import MailService from '@domain/services/mail/mail.service';
 
+//@see https://ethereal.email/create
 @Module({
   exports: [MailService],
   imports: [
     MailerModule.forRoot({
       transport: {
-        host: process.env.MAIL_HOST,
+       // host: process.env.MAIL_HOST,
+        host: 'smtp.ethereal.email',
         auth: {
-          user: process.env.MAIL_USERNAME,
-          pass: process.env.MAIL_PASSWORD,
+          user: 'geoffrey.harvey65@ethereal.email',
+          pass: '3yYtyRRRrpUYn5D6CM'
+          //user: process.env.MAIL_USERNAME,
+          //pass: process.env.MAIL_PASSWORD,
         },
       },
     }),
