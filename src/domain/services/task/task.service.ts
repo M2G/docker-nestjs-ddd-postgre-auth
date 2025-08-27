@@ -18,19 +18,13 @@ class TaskService {
 
   async lastConnectedUser(): Promise<boolean | null | any> {
     try {
-      for await (const key of (await this.redisService.findLastUserConnected()) as AsyncIterable<string>) {
+      for await (const [key] of (await this.redisService.findLastUserConnected()) as AsyncIterable<string[], void, unknown>) {
 
-        console.log('usersInfo', key);
-
-        if (!key?.length) return null;
+        if (!key) return null;
 
         const usersInfo = await this.redisService.findLastUserConnectected(key);
 
-        console.log('usersInfo', usersInfo);
-
-        if (!usersInfo) return null;
-
-        const { id, last_connected_at: lastConnectedAt }: User = JSON.parse(usersInfo);
+        const { id, last_connected_at: lastConnectedAt }: User = usersInfo && JSON.parse(usersInfo);
 
         const [ok] = await this.userModel.update(
           {
