@@ -6,5 +6,4 @@ import AuthRepository from './auth';
 import RedisRepository from './cache';
 // import MailRepository from './mail';
 
-export { AuthRepository, UsersRepository, TokenRepository, RedisRepository, MailRepository
-};
+export { AuthRepository, UsersRepository, TokenRepository, RedisRepository, MailRepository };
