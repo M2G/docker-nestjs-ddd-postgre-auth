@@ -13,14 +13,14 @@ class RedisRepository implements OnModuleDestroy, ICacheRepository {
     void this.redis.disconnect();
   }
 
-  scanIterator(keyMaatch: string): AsyncIterable<string> | null {
+  scanIterator(keyMatch: string): AsyncIterable<string[], void, unknown> {
     return this.redis.scanIterator({
       COUNT: 100,
-      MATCH: keyMaatch,
+      MATCH: keyMatch,
     });
   }
 
-  get(key: string): Promise<string | null> {
+  get(key: string[]): Promise<string | null> {
     return this.redis.get(key);
   }
 
