@@ -12,7 +12,7 @@ class RedisService {
     @Inject(forwardRef(() => RedisRepository)) private readonly redisRepository: RedisRepository,
   ) {}
 
-  findLastUserConnected(): AsyncIterable<string> | null {
+  findLastUserConnected(): AsyncIterable<string[], void, unknown> {
     return this.redisRepository.scanIterator(RedisPrefixEnum.LAST_CONNECTED_AT);
   }
 
@@ -27,7 +27,7 @@ class RedisService {
     );
   }
 
-  findLastUserConnectected(key: string): Promise<string | null> {
+  findLastUserConnectected(key: string[]): Promise<string | null> {
     return this.redisRepository.get(key);
   }
 
